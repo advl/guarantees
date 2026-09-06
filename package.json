@@ -33,13 +33,14 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage && bun run check:webarchitect",
+    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage && bun run check:webarchitect && bun run check:structure",
     "check:fix": "bun run check:biome:fix && bun run check:ts",
     "check:biome": "biome check",
     "check:biome:fix": "biome check --write",
     "check:ts": "tsc --noEmit",
     "check:webarchitect": "webarchitect library --license MIT --prefix '@aztlan/'",
     "check:leakage": "bun scripts/check-leakage.ts",
+    "check:structure": "bun scripts/check-structure.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "ci": "bun run check && bun run test:coverage"
