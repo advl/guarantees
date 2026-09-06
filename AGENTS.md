@@ -10,7 +10,7 @@ Instructions for whoever works on this repository. Everything here is true at th
 |---|---|
 | `bun install` | Installs the toolchain. The lockfile is `bun.lock`; the pipeline installs with `--frozen-lockfile`. |
 | `bun run build` | `tsc -p tsconfig.build.json` into `dist/`: modules under `dist/esm`, declarations under `dist/types`. |
-| `bun run check` | `build`, then `check:biome` (format and lint over `scripts`, `src`, `vitest.config.ts` and the root JSON files), then `check:ts` (`tsc --noEmit` over everything `tsconfig.json` includes), then `check:leakage`. |
+| `bun run check` | `build`, then `check:biome` (format and lint over `scripts`, `src`, `vitest.config.ts` and the root JSON files), then `check:ts` (`tsc --noEmit` over everything `tsconfig.json` includes), then `check:leakage`, then `check:webarchitect` (the package-structure lint: the manifest, the biome and TypeScript configuration and the licence against the `library` ruleset). |
 | `bun run check:fix` | The formatter and its safe fixes applied, then the type check. |
 | `bun run test` | `vitest run` over `src/**/*.test.ts`. |
 | `bun run test:coverage` | The same suite under v8 coverage, with a 100% floor on statements, branches, functions and lines over `src/`. |
@@ -35,7 +35,8 @@ The pipeline is `.github/workflows/ci.yml`. Its gate job installs with the lockf
 - A comment explains a hazard. Code that reads as what it does carries none.
 - Tests are colocated: `<module>.test.ts` beside `<module>.ts`. An `it` names what a caller can observe, never a mechanism; if the implementation were swapped for a different correct one, the sentence still reads as true.
 - Coverage is a floor, not a target. Behaviour lands with the tests that pin it, and the fill comes after; a suite aimed straight at the number runs every line and pins nothing, and the number looks identical either way.
-- The `@canonical/*` configs are dependencies on purpose. Do not vendor their contents and do not replace them with local copies; a ruleset correction upstream has to reach this package.
+- The `@canonical/*` configs and the `library` ruleset are dependencies on purpose. Do not vendor their contents and do not replace them with local copies; a correction upstream has to reach this package rather than being shadowed by a stale local copy.
+- The `library` ruleset defaults to a `@canonical/` name prefix and an `LGPL-3.0` licence, neither of which is true here. Both are overridden by flag — `--license MIT --prefix '@aztlan/'` — rather than by a local ruleset file, for the reason above.
 - The toolchain is pinned to exact versions, not ranges. A range would let the installed toolchain drift on the next install, and a gate whose verdict depends on the day it was installed is a different gate on every machine.
 - Node APIs only, and no `Bun` global anywhere under `src/`. The package runs under Node, and nothing declares the `Bun` global, so a reach for it fails the type check here rather than failing where the code executes.
 
@@ -54,3 +55,4 @@ The pipeline is `.github/workflows/ci.yml`. Its gate job installs with the lockf
 - Bun runs the scripts, but `tsc` and `vitest` are `#!/usr/bin/env node` executables and run under whatever Node is on PATH; the suite therefore runs under Node, which is the runtime the package is written for. The manifest's `engines` names 22 or later, and the pipeline installs exactly that; locally, an older Node fails in ways that read like a package defect.
 - The leakage gate's probes are assembled from parts, never written out: the gate is inside the set it scans, and a literal violation in it would be found by the very scan it exists to prove.
 - A module that declares only types has no statements, so v8 records it as 0/0 and it cannot move the percentages. That is why `vitest.config.ts` carves out no `types.ts`: the carve-out would buy nothing except a hole for any runtime value dropped into such a file.
+- `biome.json` holds `extends` and `files.includes` and nothing else, because the `library` ruleset admits no other key. Rules come from the shared config; a rule block added here fails `check:webarchitect`, which reads as a lint misconfiguration and is not one.
