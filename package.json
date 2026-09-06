@@ -33,11 +33,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "check": "bun run build && bun run check:biome && bun run check:ts",
+    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage",
     "check:fix": "bun run check:biome:fix && bun run check:ts",
     "check:biome": "biome check",
     "check:biome:fix": "biome check --write",
     "check:ts": "tsc --noEmit",
+    "check:leakage": "bun scripts/check-leakage.ts",
     "ci": "bun run check"
   },
   "devDependencies": {

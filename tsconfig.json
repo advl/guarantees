@@ -11,5 +11,5 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["scripts/**/*.ts", "src/**/*.ts"]
 }
