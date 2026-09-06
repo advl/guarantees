@@ -1,0 +1,15 @@
+{
+  "extends": "@canonical/typescript-config",
+  // `types` names Node and nothing else, so no other ambient `@types/*`
+  // package is picked up implicitly. The package runs under Node, and with
+  // nothing declaring the `Bun` global a reach for it fails the type check
+  // here rather than failing where the code executes.
+  //
+  // No `baseUrl`: without a `paths` map it only adds a second, non-resolvable
+  // spelling for intra-package imports. `import "index.js"` would type-check
+  // and emit unchanged, then throw ERR_MODULE_NOT_FOUND in a consumer.
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"]
+}

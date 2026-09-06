@@ -1,0 +1,23 @@
+{
+  // `inlineSources` is what makes the emitted map usable: the manifest's
+  // `files` is `["dist"]`, so a map whose `sources` points at `../src` names
+  // a path no consumer receives. Carrying the source inside the map keeps the
+  // promise the map makes.
+  //
+  // There is no equivalent for `declarationMap` — tsc ignores `inlineSources`
+  // when writing `.d.ts.map` — and the alternative, adding `src` to `files`,
+  // would also ship the `_`-prefixed trees at the top of `src`, which are the
+  // ones that must never travel. So declarations ship without a map rather
+  // than with a broken one.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "inlineSources": true,
+    "outDir": "dist/esm",
+    "rootDir": "src",
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/_*", "src/_*/**", "src/**/*.test.ts"]
+}
