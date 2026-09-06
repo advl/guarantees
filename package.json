@@ -1,0 +1,29 @@
+{
+  "name": "@aztlan/guarantees",
+  "description": "The scheduler for a repository's guarantees: a register of rows, each run in a digest-pinned container under the repository's own test runner, and a verdict",
+  "version": "0.0.0",
+  "type": "module",
+  "author": {
+    "email": "47156835+advl@users.noreply.github.com",
+    "name": "advl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/advl/guarantees"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/advl/guarantees/issues"
+  },
+  "homepage": "https://github.com/advl/guarantees#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.9",
+    "@canonical/biome-config": "0.33.0",
+    "@canonical/typescript-config": "0.33.0",
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3"
+  }
+}
