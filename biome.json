@@ -1,6 +1,6 @@
 {
   "extends": ["@canonical/biome-config"],
   "files": {
-    "includes": ["scripts", "src", "*.json"]
+    "includes": ["scripts", "src", "vitest.config.ts", "*.json"]
   }
 }

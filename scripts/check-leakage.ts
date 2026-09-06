@@ -91,6 +91,7 @@ const ROOT_ENTRIES = new Set([
   "src",
   "tsconfig.build.json",
   "tsconfig.json",
+  "vitest.config.ts",
 ]);
 
 /**

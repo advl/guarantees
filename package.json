@@ -39,13 +39,17 @@
     "check:biome:fix": "biome check --write",
     "check:ts": "tsc --noEmit",
     "check:leakage": "bun scripts/check-leakage.ts",
-    "ci": "bun run check"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "ci": "bun run check && bun run test:coverage"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.9",
     "@canonical/biome-config": "0.33.0",
     "@canonical/typescript-config": "0.33.0",
     "@types/node": "24.13.3",
-    "typescript": "5.9.3"
+    "@vitest/coverage-v8": "4.1.10",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
   }
 }
