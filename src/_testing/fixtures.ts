@@ -1,7 +1,7 @@
 /**
  * Shared fixture data: register texts in the shapes consumers write, the
- * probe a measuring entry writes, and the renderers the texts are built
- * from. A refusal test takes a base text and applies one
+ * probe a measuring entry writes, the runner's reports, and the renderers
+ * the texts are built from. A refusal test takes a base text and applies one
  * mutation, so exactly one refusal fires and the assertion can name it.
  */
 
@@ -174,3 +174,113 @@ export const REGISTER_TWO_IMAGES = renderRegister([
     expect: `"fail"`,
   }),
 ]);
+
+const REPORT_FILE = "/workspace/guarantees/corpus-bijection.test.ts";
+
+/** One passed assertion as the runner reports it. */
+export const ASSERTION_PASSED = {
+  ancestorTitles: ["corpus-bijection"],
+  title: "every file has a row",
+  fullName: "corpus-bijection every file has a row",
+  status: "passed",
+};
+
+/** One file's results as the runner reports them, every assertion passed. */
+export const FILE_GREEN = {
+  name: REPORT_FILE,
+  status: "passed",
+  assertionResults: [
+    ASSERTION_PASSED,
+    {
+      ...ASSERTION_PASSED,
+      title: "every row resolves to a file",
+      fullName: "corpus-bijection every row resolves to a file",
+    },
+  ],
+};
+
+/** The runner's report of a run in which every assertion passed. */
+export const REPORT_GREEN = {
+  numTotalTests: 2,
+  numPassedTests: 2,
+  numFailedTests: 0,
+  numPendingTests: 0,
+  startTime: 1_700_000_000_000,
+  success: true,
+  testResults: [FILE_GREEN],
+};
+
+/** The runner's report of a run in which one assertion failed. */
+export const REPORT_RED = {
+  numTotalTests: 2,
+  numPassedTests: 1,
+  numFailedTests: 1,
+  numPendingTests: 0,
+  startTime: 1_700_000_000_000,
+  success: false,
+  testResults: [
+    {
+      name: "/workspace/guarantees/selftest/corpus-can-fail.test.ts",
+      status: "failed",
+      assertionResults: [
+        {
+          ancestorTitles: ["corpus-can-fail"],
+          title: "reads its own row",
+          fullName: "corpus-can-fail reads its own row",
+          status: "passed",
+        },
+        {
+          ancestorTitles: ["corpus-can-fail"],
+          title: "asserts a falsehood",
+          fullName: "corpus-can-fail asserts a falsehood",
+          status: "failed",
+        },
+      ],
+    },
+  ],
+};
+
+/** The runner's report of a run in which nothing was collected. */
+export const REPORT_EMPTY = {
+  numTotalTests: 0,
+  numPassedTests: 0,
+  numFailedTests: 0,
+  numPendingTests: 0,
+  startTime: 1_700_000_000_000,
+  success: true,
+  testResults: [{ name: REPORT_FILE, status: "passed", assertionResults: [] }],
+};
+
+/**
+ * The runner's report of a run in which two assertions were collected and
+ * every one was skipped: nothing passed and nothing failed, and the counts
+ * agree with the statuses.
+ */
+export const REPORT_SKIPPED = {
+  numTotalTests: 2,
+  numPassedTests: 0,
+  numFailedTests: 0,
+  numPendingTests: 2,
+  startTime: 1_700_000_000_000,
+  success: true,
+  testResults: [
+    {
+      ...FILE_GREEN,
+      status: "skipped",
+      assertionResults: FILE_GREEN.assertionResults.map((assertion) => ({
+        ...assertion,
+        status: "skipped",
+      })),
+    },
+  ],
+};
+
+/**
+ * The skipped report with a passed count its assertions do not bear out:
+ * two counted, none listed. A reader that trusted the count would judge a
+ * run that asserted nothing as green.
+ */
+export const REPORT_SKIPPED_COUNTED = { ...REPORT_SKIPPED, numPassedTests: 2 };
+
+/** A report object as the runner writes it. */
+export const renderReport = (report: unknown): string => JSON.stringify(report);

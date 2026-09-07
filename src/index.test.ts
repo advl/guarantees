@@ -34,14 +34,17 @@ describe("@aztlan/guarantees", () => {
       "UNMEASURED_S",
       "computeBudget",
       "computeP95",
+      "judgeRun",
       "labelSchema",
       "markerSchema",
       "parseRegister",
       "probeSchema",
       "readProbe",
+      "readReport",
       "registerSchema",
       "reportSchema",
       "rewriteRunBudget",
+      "toExitCode",
     ]);
   });
 
@@ -49,6 +52,7 @@ describe("@aztlan/guarantees", () => {
     expect(listDeclaredExports(declared)).toEqual(
       [
         ...Object.keys(source),
+        "type ExitCode",
         "type Expect",
         "type Isolation",
         "type Kind",
@@ -62,7 +66,9 @@ describe("@aztlan/guarantees", () => {
         "type Row",
         "type RunBudget",
         "type Stamp",
+        "type Summary",
         "type Tier",
+        "type Verdict",
       ].sort(),
     );
   });

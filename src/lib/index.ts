@@ -45,3 +45,11 @@ export {
   type Tier,
   UNMEASURED_S,
 } from "./register/index.js";
+export {
+  type ExitCode,
+  judgeRun,
+  readReport,
+  type Summary,
+  toExitCode,
+  type Verdict,
+} from "./verdict/index.js";
