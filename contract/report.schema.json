@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Report",
+  "description": "The runner's JSON report, as far as a verdict reads it: the shape the TypeScript test runner writes. An implementation over another runner reads that runner's own report into the same three counts and the same list of assertions, and is held to the same verdict. Necessary and not sufficient: the parser also requires the passed count and the failed count each to equal the number of assertions of that status listed.",
+  "type": "object",
+  "properties": {
+    "numTotalTests": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "numPassedTests": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "numFailedTests": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "testResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assertionResults": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "skipped",
+                    "pending",
+                    "disabled"
+                  ]
+                }
+              },
+              "required": [
+                "title",
+                "fullName",
+                "status"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "assertionResults"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "numTotalTests",
+    "numPassedTests",
+    "numFailedTests",
+    "testResults"
+  ],
+  "additionalProperties": true
+}

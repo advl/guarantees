@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Labels",
+  "description": "The labels on every container a run starts. `corpus` is the checkout the run belongs to, so two checkouts of one repository never remove each other's containers.",
+  "type": "object",
+  "properties": {
+    "corpus": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{12}$",
+      "description": "The first twelve hex digits of a hash of the checkout path."
+    },
+    "entry": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "not": {
+        "enum": [
+          "corpus",
+          "reports"
+        ]
+      },
+      "description": "Lowercase letters, digits and hyphens, opening on a letter or a digit; a directory name and half a container name before it is anything else. `corpus` is reserved for the register's header and `reports` for the lifted run reports."
+    }
+  },
+  "required": [
+    "corpus",
+    "entry"
+  ],
+  "additionalProperties": false
+}

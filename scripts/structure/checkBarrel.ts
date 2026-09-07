@@ -15,6 +15,14 @@ import type { Checked } from "./types.js";
 const SAME_DIRECTORY = /^\.\/([^./][^/]*)\.js$/;
 const CHILD_BARREL = /^\.\/([^./][^/]*)\/index\.js$/;
 
+/**
+ * The one sibling whose exports a barrel names rather than aliases. A
+ * constants file has no default to alias — it holds uniform named constants
+ * by the collection rule — so the barrel takes the names it publishes, as it
+ * does from a child's barrel.
+ */
+const COLLECTION_STEM = "constants";
+
 /** A barrel is pure, curated, and reaches one level down. */
 export default function checkBarrel({ source, lineOf, report }: Checked): void {
   for (const statement of source.statements) {
@@ -89,11 +97,16 @@ export default function checkBarrel({ source, lineOf, report }: Checked): void {
       if (typeOnly) continue; // a type has no default to re-export
       const exported = element.propertyName?.text ?? element.name.text;
 
-      if (child) {
+      if (child || stem === COLLECTION_STEM) {
         if (exported === "default") {
           report(
             "barrel/default-alias",
-            `line ${line}: re-export of \`default\` from "${specifier}" — a child's barrel has no default; take the name it publishes`,
+            `line ${line}: re-export of \`default\` from "${specifier}" — ${child ? "a child's barrel" : "a constants file"} has no default; take the names it publishes`,
+          );
+        } else if (exported.startsWith("_")) {
+          report(
+            "barrel/no-internals",
+            `line ${line}: re-export of \`${exported}\` from "${specifier}" — the \`_\` prefix marks a name internal to its directory, and a barrel is where a name stops being internal`,
           );
         }
         continue;

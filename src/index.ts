@@ -6,4 +6,13 @@
  * Every value a consumer imports from the package root is admitted here by
  * name. Importing this module has no side effects.
  */
-export {};
+export {
+  CONTRACT_VERSION,
+  EXIT_CODES,
+  labelSchema,
+  markerSchema,
+  probeSchema,
+  Refusal,
+  registerSchema,
+  reportSchema,
+} from "./lib/index.js";

@@ -284,6 +284,28 @@ const probes: readonly {
     },
   },
   {
+    rule: "barrel/default-alias",
+    run: () => {
+      const { checked, reported } = parsed(
+        "index.ts",
+        `export { default as constants } from "./constants.js";`,
+      );
+      checkBarrel(checked);
+      return reported;
+    },
+  },
+  {
+    rule: "barrel/no-internals",
+    run: () => {
+      const { checked, reported } = parsed(
+        "index.ts",
+        `export { _A } from "./constants.js";`,
+      );
+      checkBarrel(checked);
+      return reported;
+    },
+  },
+  {
     rule: "file/default-on-definition",
     run: () => {
       const { checked, reported } = parsed(

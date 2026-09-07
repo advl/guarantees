@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Marker",
+  "description": "Written by a run before anything starts, on the same filesystem as the report; a report dated before it belongs to an earlier run.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "not": {
+        "enum": [
+          "corpus",
+          "reports"
+        ]
+      },
+      "description": "Lowercase letters, digits and hyphens, opening on a letter or a digit; a directory name and half a container name before it is anything else. `corpus` is reserved for the register's header and `reports` for the lifted run reports."
+    },
+    "startedAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Milliseconds since the epoch, as the filesystem dates it."
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "id",
+    "startedAt",
+    "pid"
+  ],
+  "additionalProperties": false
+}

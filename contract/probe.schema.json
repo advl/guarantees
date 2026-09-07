@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Probe",
+  "description": "What a measuring entry writes: the contract version, readings — each a metric, its value and units, the phase it was taken in, the fixture it ran against and the machine class it ran on — and, optionally, the stamp of what took them. A reading admits no other key, because one that cannot be compared to the next is an opinion with a number on it; a reading spelled as name, unit and value is refused, and a writer that spells it so changes.",
+  "type": "object",
+  "properties": {
+    "contract": {
+      "const": "1",
+      "description": "The contract version the probe is written against, the register schema's `$defs/version`; a probe naming any other is refused."
+    },
+    "stamp": {
+      "$ref": "#/$defs/stamp"
+    },
+    "readings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/reading"
+      }
+    }
+  },
+  "required": [
+    "contract",
+    "readings"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "phase": {
+      "enum": [
+        "cold",
+        "warm"
+      ],
+      "description": "`cold` before any warm-up, `warm` after."
+    },
+    "stamp": {
+      "type": "object",
+      "properties": {
+        "instrument": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What took the readings — a benchmark harness, a timer, a size probe — with its version."
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the readings were taken, as the entry's clock says. Freshness is judged from the filesystem, never from this."
+        }
+      },
+      "required": [
+        "instrument",
+        "at"
+      ],
+      "additionalProperties": false,
+      "description": "Where the readings came from. Never a hostname: a machine is named by its class, on the reading."
+    },
+    "reading": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "number"
+        },
+        "units": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "fixture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A machine class, never a hostname."
+        }
+      },
+      "required": [
+        "metric",
+        "value",
+        "units",
+        "phase",
+        "fixture",
+        "class"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
