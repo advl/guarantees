@@ -21,13 +21,22 @@ const declared = fileURLToPath(
 describe("@aztlan/guarantees", () => {
   it("publishes exactly the values of the pure domains", () => {
     expect(Object.keys(source).sort()).toEqual([
+      "CEILINGS",
       "CONTRACT_VERSION",
       "EXIT_CODES",
+      "ISOLATIONS",
+      "KINDS",
+      "POOLED_KINDS",
+      "RESERVED_IDS",
       "Refusal",
+      "RegisterRefusal",
+      "TIERS",
+      "UNMEASURED_S",
       "computeBudget",
       "computeP95",
       "labelSchema",
       "markerSchema",
+      "parseRegister",
       "probeSchema",
       "readProbe",
       "registerSchema",
@@ -40,11 +49,20 @@ describe("@aztlan/guarantees", () => {
     expect(listDeclaredExports(declared)).toEqual(
       [
         ...Object.keys(source),
+        "type Expect",
+        "type Isolation",
+        "type Kind",
         "type Measurement",
         "type Phase",
         "type Probe",
         "type Reading",
+        "type Pipeline",
+        "type Register",
+        "type RegisterFault",
+        "type Row",
+        "type RunBudget",
         "type Stamp",
+        "type Tier",
       ].sort(),
     );
   });

@@ -25,3 +25,23 @@ export {
   registerSchema,
   reportSchema,
 } from "./contract/index.js";
+export {
+  CEILINGS,
+  type Expect,
+  ISOLATIONS,
+  type Isolation,
+  KINDS,
+  type Kind,
+  type Pipeline,
+  POOLED_KINDS,
+  parseRegister,
+  RESERVED_IDS,
+  type Register,
+  type RegisterFault,
+  RegisterRefusal,
+  type Row,
+  type RunBudget,
+  TIERS,
+  type Tier,
+  UNMEASURED_S,
+} from "./register/index.js";

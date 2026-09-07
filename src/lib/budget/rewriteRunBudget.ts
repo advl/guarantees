@@ -12,7 +12,10 @@ export type Measurement = {
 
 // A header line is recognised by shape and never by a TOML parse: the
 // rebudget keeps every other byte of the text, layout included, which a
-// parse and a re-serialisation would not.
+// parse and a re-serialisation would not. The register's own scan holds a
+// copy of this line grammar, and a test in the register domain pins the two
+// equal rather than sharing them: the register reads the budget, so the
+// budget cannot read the register without a cycle.
 const HEADER = /^\s*\[\s*([^\]]*?)\s*\]\s*(?:#.*)?\r?$/;
 const RUN_S_KEY = /^\s*run_s\s*=/;
 // A quoted string inside the table may carry a brace, and the register
