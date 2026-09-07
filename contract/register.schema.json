@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Register",
+  "description": "One table per guarantee, keyed by id, plus an optional `corpus` header table. This schema is necessary and not sufficient: the parser also requires a budget of at least ceil(p95 × 1.5), a teardown wherever holds is non-empty, a file carrying the suffix the runner collects, one row expecting failure in every tier that holds rows, and every such tier triggered and proven by the pipeline.",
+  "type": "object",
+  "properties": {
+    "corpus": {
+      "$ref": "#/$defs/header"
+    }
+  },
+  "propertyNames": {
+    "anyOf": [
+      {
+        "const": "corpus"
+      },
+      {
+        "$ref": "#/$defs/id"
+      }
+    ]
+  },
+  "additionalProperties": {
+    "$ref": "#/$defs/row"
+  },
+  "$defs": {
+    "version": {
+      "const": "1",
+      "description": "The contract version this schema is published under. A register names it in `corpus.contract` and a probe in `contract`; a document naming another version is refused rather than read as this one."
+    },
+    "exitCodes": {
+      "const": {
+        "green": 0,
+        "red": 1,
+        "refused": 2
+      },
+      "description": "What a run's exit code means. `green` and `red` are verdicts read from the report the run wrote, never from the runner's own exit code; `refused` is the scheduler declining to judge — a register, a report or a probe it could not read, a report that is not this run's, a run in which nothing executed. Carried here because the register is the document every implementation reads first."
+    },
+    "limits": {
+      "const": {
+        "ceilings": {
+          "pr": {
+            "entry": 60,
+            "wall": 300
+          },
+          "merge": {
+            "entry": 900,
+            "wall": 900
+          },
+          "nightly": {
+            "entry": 3600,
+            "wall": 3600
+          }
+        },
+        "unmeasuredS": 600,
+        "budget": {
+          "floorS": 10,
+          "headroom": 1.5,
+          "killMultiplier": 3,
+          "runs": 5,
+          "p95": "nearest-rank"
+        }
+      },
+      "description": "The numbers the parser and the scheduler hold a register to: per-tier ceilings in seconds, the deadline on everything outside the measured window, and the budget rule — the floor, the headroom, the hard-kill multiplier, how many measured windows a budget is set from and the p95 estimator over them, nearest rank. A tier absent from `ceilings` has none."
+    },
+    "header": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "$ref": "#/$defs/version",
+          "default": "1",
+          "description": "The contract version the register is written against; any other is refused. Absent — no header, or a header without it — the register is written against the default, the version at which the header did not exist, and never against the current one."
+        }
+      },
+      "additionalProperties": false
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "not": {
+        "enum": [
+          "corpus",
+          "reports"
+        ]
+      },
+      "description": "Lowercase letters, digits and hyphens, opening on a letter or a digit; a directory name and half a container name before it is anything else. `corpus` is reserved for the register's header and `reports` for the lifted run reports."
+    },
+    "kind": {
+      "enum": [
+        "oracle",
+        "determinism",
+        "conformance",
+        "golden",
+        "budget",
+        "compat",
+        "perf"
+      ],
+      "description": "What sort of fact the row pins. The kinds in `$defs/pooledKinds` run as a pool; every other kind runs one at a time after the pool drains, as does any row that declares `holds`."
+    },
+    "pooledKinds": {
+      "const": [
+        "conformance",
+        "oracle",
+        "determinism"
+      ],
+      "description": "The kinds whose rows share the machine, running as a pool at its concurrency. A row of any other kind, and a row of these that declares `holds`, runs alone after the pool drains: a budget measured beside other containers is not the budget, and a held resource is one another row could contend for. Carried as data so an implementation reads the partition from the file rather than from prose."
+    },
+    "tier": {
+      "enum": [
+        "pr",
+        "merge",
+        "nightly",
+        "release"
+      ],
+      "description": "The earliest moment the thing the row pins could have changed, demoted only as its cost demands."
+    },
+    "isolation": {
+      "enum": [
+        "image",
+        "image-net"
+      ],
+      "description": "What the measured run may reach. `image-net` keeps the image and drops only the network wall."
+    },
+    "expect": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "description": "`fail` marks the row designed to fail; a tier is green only once it has been seen to fail."
+    },
+    "image": {
+      "type": "string",
+      "pattern": "^[^@\\s]+@sha256:[0-9a-f]{64}$",
+      "description": "The image the run is admissible in, pinned by digest and never by tag."
+    },
+    "file": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).*$",
+      "description": "The test file, relative to the corpus directory and inside it, on one line. Which suffix a runner collects is that runner's rule, so the parser holds the file to the suffix its caller names and the schema does not."
+    },
+    "recipes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Task-face recipe names, each run in order."
+    },
+    "run_s": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A machine class, never a hostname."
+        },
+        "p95": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "The measurement the budget came from, in seconds."
+        },
+        "budget": {
+          "type": "integer",
+          "minimum": 10,
+          "description": "Seconds: the p95 rounded to a tenth, times 1.5, rounded up, and never below 10. The hard kill is 3 times this."
+        }
+      },
+      "required": [
+        "class",
+        "p95",
+        "budget"
+      ],
+      "additionalProperties": false
+    },
+    "row": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "tier": {
+          "$ref": "#/$defs/tier"
+        },
+        "file": {
+          "$ref": "#/$defs/file"
+        },
+        "select": {
+          "type": "string",
+          "minLength": 1,
+          "description": "How the host runner finds the entry inside its file."
+        },
+        "build": {
+          "$ref": "#/$defs/recipes"
+        },
+        "image": {
+          "$ref": "#/$defs/image"
+        },
+        "isolation": {
+          "$ref": "#/$defs/isolation"
+        },
+        "holds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Resources the entry keeps beyond its own container. Naming one obliges a teardown."
+        },
+        "teardown": {
+          "$ref": "#/$defs/recipes"
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "run_s": {
+          "$ref": "#/$defs/run_s"
+        }
+      },
+      "required": [
+        "kind",
+        "tier",
+        "file",
+        "select",
+        "build",
+        "image",
+        "isolation",
+        "holds",
+        "teardown",
+        "expect",
+        "run_s"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tier": {
+                "const": "pr"
+              }
+            },
+            "required": [
+              "tier"
+            ]
+          },
+          "then": {
+            "properties": {
+              "run_s": {
+                "properties": {
+                  "budget": {
+                    "maximum": 60
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tier": {
+                "const": "merge"
+              }
+            },
+            "required": [
+              "tier"
+            ]
+          },
+          "then": {
+            "properties": {
+              "run_s": {
+                "properties": {
+                  "budget": {
+                    "maximum": 900
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tier": {
+                "const": "nightly"
+              }
+            },
+            "required": [
+              "tier"
+            ]
+          },
+          "then": {
+            "properties": {
+              "run_s": {
+                "properties": {
+                  "budget": {
+                    "maximum": 3600
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -9,10 +9,16 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "default": "./dist/esm/index.js"
-    }
+    },
+    "./contract": {
+      "types": "./dist/types/contract.d.ts",
+      "default": "./dist/esm/contract.js"
+    },
+    "./contract/*.schema.json": "./contract/*.schema.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "contract"
   ],
   "sideEffects": false,
   "author": {
@@ -32,8 +38,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage && bun run check:webarchitect && bun run check:structure",
+    "build": "tsc -p tsconfig.build.json && bun run build:contract",
+    "build:contract": "bun src/scripts/emitSchemas.ts",
+    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage && bun run check:webarchitect && bun run check:structure && bun run check:contract",
     "check:fix": "bun run check:biome:fix && bun run check:ts",
     "check:biome": "biome check",
     "check:biome:fix": "biome check --write",
@@ -41,6 +48,7 @@
     "check:webarchitect": "webarchitect library --license MIT --prefix '@aztlan/'",
     "check:leakage": "bun scripts/check-leakage.ts",
     "check:structure": "bun scripts/check-structure.ts",
+    "check:contract": "bun scripts/check-contract.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "ci": "bun run check && bun run test:coverage"
@@ -54,5 +62,8 @@
     "@vitest/coverage-v8": "4.1.10",
     "typescript": "5.9.3",
     "vitest": "4.1.10"
+  },
+  "dependencies": {
+    "smol-toml": "1.7.1"
   }
 }

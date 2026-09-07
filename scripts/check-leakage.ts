@@ -86,6 +86,7 @@ const ROOT_ENTRIES = new Set([
   "README.md",
   "biome.json",
   "bun.lock",
+  "contract",
   "package.json",
   "scripts",
   "src",
