@@ -38,10 +38,15 @@ export const PROPERTY_FOLDERS: ReadonlySet<string> = new Set([
   "utils",
 ]);
 
-/** Collection files are the one lawful exception to one-default-per-file. */
+/**
+ * Collection files are the one lawful exception to one-default-per-file. A
+ * fixtures file is a constants file by another name: static test data and
+ * pure renderers, each a `const`, and never a JSON file.
+ */
 export const COLLECTIONS: ReadonlySet<string> = new Set([
   "types.ts",
   "constants.ts",
+  "fixtures.ts",
 ]);
 
 /** Objects whose `env` property is the ambient environment. */

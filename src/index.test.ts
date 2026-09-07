@@ -24,17 +24,28 @@ describe("@aztlan/guarantees", () => {
       "CONTRACT_VERSION",
       "EXIT_CODES",
       "Refusal",
+      "computeBudget",
+      "computeP95",
       "labelSchema",
       "markerSchema",
       "probeSchema",
+      "readProbe",
       "registerSchema",
       "reportSchema",
+      "rewriteRunBudget",
     ]);
   });
 
   it("declares exactly those values and the types of their signatures", () => {
     expect(listDeclaredExports(declared)).toEqual(
-      [...Object.keys(source)].sort(),
+      [
+        ...Object.keys(source),
+        "type Measurement",
+        "type Phase",
+        "type Probe",
+        "type Reading",
+        "type Stamp",
+      ].sort(),
     );
   });
 

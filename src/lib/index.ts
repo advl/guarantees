@@ -5,6 +5,17 @@
  * entry modules at the top of `src/` reach one level down and no deeper.
  */
 export {
+  computeBudget,
+  computeP95,
+  type Measurement,
+  type Phase,
+  type Probe,
+  type Reading,
+  readProbe,
+  rewriteRunBudget,
+  type Stamp,
+} from "./budget/index.js";
+export {
   CONTRACT_VERSION,
   EXIT_CODES,
   labelSchema,

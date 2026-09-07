@@ -8,11 +8,20 @@
  */
 export {
   CONTRACT_VERSION,
+  computeBudget,
+  computeP95,
   EXIT_CODES,
   labelSchema,
+  type Measurement,
   markerSchema,
+  type Phase,
+  type Probe,
   probeSchema,
+  type Reading,
   Refusal,
+  readProbe,
   registerSchema,
   reportSchema,
+  rewriteRunBudget,
+  type Stamp,
 } from "./lib/index.js";
