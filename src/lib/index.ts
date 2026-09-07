@@ -46,6 +46,11 @@ export {
   UNMEASURED_S,
 } from "./register/index.js";
 export {
+  judgeWall,
+  type Plan,
+  planTier,
+} from "./schedule/index.js";
+export {
   type ExitCode,
   judgeRun,
   readReport,
