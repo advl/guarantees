@@ -28,6 +28,12 @@ export {
   reportSchema,
 } from "./contract/index.js";
 export {
+  type Spawn,
+  type Spawned,
+  type SpawnOptions,
+  spawnProcess,
+} from "./process/index.js";
+export {
   CEILINGS,
   type Expect,
   ISOLATIONS,
