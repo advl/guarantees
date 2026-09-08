@@ -28,6 +28,20 @@ export {
   reportSchema,
 } from "./contract/index.js";
 export {
+  type Built,
+  buildImage,
+  CONTAINERFILE,
+  hashImageInputs,
+  IMAGES_DIR,
+  type ImageRef,
+  INPUTS_PATTERN,
+  PINNED_FILE,
+  type Pinned,
+  REFERENCE_PATTERN,
+  readPinned,
+  resolveImage,
+} from "./image/index.js";
+export {
   type Spawn,
   type Spawned,
   type SpawnOptions,

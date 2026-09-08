@@ -47,6 +47,7 @@ describe("@aztlan/guarantees", () => {
       "reapStale",
       "registerSchema",
       "reportSchema",
+      "resolveImage",
       "rewriteRunBudget",
       "toExitCode",
     ]);
@@ -59,6 +60,7 @@ describe("@aztlan/guarantees", () => {
         "type Engine",
         "type ExitCode",
         "type Expect",
+        "type ImageRef",
         "type Isolation",
         "type Kind",
         "type Measurement",

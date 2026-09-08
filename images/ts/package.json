@@ -1,0 +1,15 @@
+{
+  "name": "@aztlan/guarantees-image-ts",
+  "private": true,
+  "description": "The toolchain of the TypeScript base image, installed at the image's root from this lockfile",
+  "dependencies": {
+    "@biomejs/biome": "2.4.9",
+    "@canonical/biome-config": "0.33.0",
+    "@canonical/typescript-config": "0.33.0",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-v8": "4.1.10",
+    "smol-toml": "1.7.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
