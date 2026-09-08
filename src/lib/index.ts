@@ -54,6 +54,26 @@ export {
   UNMEASURED_S,
 } from "./register/index.js";
 export {
+  CORPUS_LABEL,
+  type DescribeContext,
+  describeRun,
+  ENGINE,
+  ENGINE_FAULT_CODE,
+  ENTRY_LABEL,
+  type Engine,
+  hashCheckout,
+  KILL_MULTIPLIER,
+  MARKER_FILE,
+  type Mount,
+  NAME_PREFIX,
+  probeEngine,
+  type RunContext,
+  type RunPhase,
+  type RunSpec,
+  reapStale,
+  TASK_FACE,
+} from "./run/index.js";
+export {
   COLLECTS,
   defineCorpusConfig,
   listCollected,

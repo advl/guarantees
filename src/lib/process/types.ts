@@ -4,8 +4,6 @@
  * rather than inferred from the clock afterwards, because a process killed
  * at its deadline and one that finished a millisecond inside it are
  * indistinguishable by elapsed time and only one of them is a breach.
- *
- * @package
  */
 export type Spawned = {
   readonly code: number | null;
@@ -13,7 +11,6 @@ export type Spawned = {
   readonly killed: boolean;
 };
 
-/** What a spawn is asked beside the binary and its arguments. @package */
 export type SpawnOptions = {
   readonly cwd?: string;
   /** When the process is given up on, in milliseconds. */
@@ -33,8 +30,6 @@ export type SpawnOptions = {
  * runs a host process takes — the engine's client, the corpus's runner, the
  * task face: a test hands in a fake that records what it was asked and
  * answers as scripted; the default spawns for real.
- *
- * @package
  */
 export type Spawn = (
   binary: string,
