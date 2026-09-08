@@ -54,6 +54,17 @@ export {
   UNMEASURED_S,
 } from "./register/index.js";
 export {
+  COLLECTS,
+  defineCorpusConfig,
+  listCollected,
+  REPORT_FILE,
+  REPORTS_DIR,
+  RUNNER_BIN,
+  renderEntryCommand,
+  WORK_DIR,
+  WORKSPACE,
+} from "./runner/index.js";
+export {
   judgeWall,
   type Plan,
   planTier,

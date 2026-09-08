@@ -238,7 +238,8 @@ export const registerSchema = {
         select: {
           type: "string",
           minLength: 1,
-          description: "How the host runner finds the entry inside its file.",
+          description:
+            "The title of the entry's suite, or of its one test, as the host runner joins titles with single spaces; matched from the start of the full title and never as a pattern, so what the row writes is what the runner selects.",
         },
         build: { $ref: "#/$defs/recipes" },
         image: { $ref: "#/$defs/image" },
