@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,27 +36,37 @@ export type FixtureCorpus = {
  * binds registers and a fixture row here needs a budget of a second.
  *
  * Where the repository is written decides what its containers are
- * labelled, since the label is a hash of the root: a fixed place under the
- * temp directory keyed by this package's own checkout and the name,
- * recreated empty, so the label is the same on every run from this checkout
- * and what an interrupted run left running is what the next run's reap
- * finds, while a second checkout of this package hashes to another place.
+ * labelled, since the label is a hash of the root. Without a `name` the
+ * root is a fresh temp directory, a checkout of its own nothing else will
+ * sweep, which is what a unit test wants. With one, it is a fixed place
+ * under the temp directory keyed by this package's own checkout and the
+ * name, recreated empty: the same label on every run from this checkout, so
+ * what an interrupted run left running is what the next run's reap finds,
+ * while a second checkout of this package hashes to another place.
  *
  * @note Impure — writes a temp directory; `remove` deletes it.
  */
 export default function makeCorpus(options: {
   readonly entries: readonly FixtureEntry[];
   readonly scripts?: Readonly<Record<string, string>>;
-  readonly name: string;
+  readonly name?: string;
 }): FixtureCorpus {
-  const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-  const repositoryRoot = join(
-    tmpdir(),
-    `guarantees-${hashCheckout(packageRoot)}`,
-    options.name,
-  );
-  rmSync(repositoryRoot, { recursive: true, force: true });
-  mkdirSync(repositoryRoot, { recursive: true });
+  let repositoryRoot: string;
+  if (options.name === undefined) {
+    repositoryRoot = mkdtempSync(join(tmpdir(), "guarantees-corpus-"));
+  } else {
+    const packageRoot = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      "../..",
+    );
+    repositoryRoot = join(
+      tmpdir(),
+      `guarantees-${hashCheckout(packageRoot)}`,
+      options.name,
+    );
+    rmSync(repositoryRoot, { recursive: true, force: true });
+    mkdirSync(repositoryRoot, { recursive: true });
+  }
   const corpusRoot = join(repositoryRoot, "guarantees");
   mkdirSync(corpusRoot);
   writeFileSync(

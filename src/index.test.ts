@@ -49,6 +49,7 @@ describe("@aztlan/guarantees", () => {
       "reportSchema",
       "resolveImage",
       "rewriteRunBudget",
+      "runEntry",
       "toExitCode",
     ]);
   });
@@ -67,12 +68,14 @@ describe("@aztlan/guarantees", () => {
         "type Phase",
         "type Plan",
         "type Probe",
+        "type Ran",
         "type Reading",
         "type Pipeline",
         "type Register",
         "type RegisterFault",
         "type Row",
         "type RunBudget",
+        "type RunContext",
         "type Spawn",
         "type SpawnOptions",
         "type Spawned",

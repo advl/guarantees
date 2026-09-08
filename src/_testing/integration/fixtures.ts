@@ -21,3 +21,28 @@ export const renderEntry = (id: string, body: string): string =>
 /** An entry that passes. */
 export const renderPassing = (id: string): string =>
   renderEntry(id, "expect(true).toBe(true);");
+
+/** An entry that fails on a designed assertion. */
+export const renderFailing = (id: string): string =>
+  renderEntry(id, "expect(false).toBe(true);");
+
+/** An entry that sleeps past any budget the suite would give it. */
+export const renderSleeping = (id: string, seconds: number): string =>
+  renderEntry(
+    id,
+    `await new Promise((resolve) => setTimeout(resolve, ${seconds * 1000}));`,
+  );
+
+/** An entry that writes `path` and asserts the write went through. */
+export const renderWriting = (id: string, path: string): string =>
+  renderEntry(
+    id,
+    `const { writeFileSync } = await import("node:fs"); writeFileSync(${JSON.stringify(path)}, "written"); expect(true).toBe(true);`,
+  );
+
+/** An entry that resolves a host and asserts the lookup was refused. */
+export const renderLookingUp = (id: string, host: string): string =>
+  renderEntry(
+    id,
+    `const { lookup } = await import("node:dns/promises"); await expect(lookup(${JSON.stringify(host)})).rejects.toThrow();`,
+  );

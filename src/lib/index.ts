@@ -81,11 +81,14 @@ export {
   type Mount,
   NAME_PREFIX,
   probeEngine,
+  type Ran,
   type RunContext,
   type RunPhase,
   type RunSpec,
   reapStale,
+  runEntry,
   TASK_FACE,
+  tearDown,
 } from "./run/index.js";
 export {
   COLLECTS,

@@ -59,8 +59,6 @@ export type DescribeContext = {
  * What a run of one entry needs beside its row. No checkout label: a run
  * hashes it from the repository root, as a reap of the same root does, so
  * the two cannot be handed different strings.
- *
- * @package
  */
 export type RunContext = {
   readonly engine: Engine;

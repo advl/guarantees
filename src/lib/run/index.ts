@@ -21,10 +21,13 @@ export { default as describeRun } from "./describeRun.js";
 export { default as hashCheckout } from "./hashCheckout.js";
 export { default as probeEngine } from "./probeEngine.js";
 export { default as reapStale } from "./reapStale.js";
+export { default as runEntry } from "./runEntry.js";
+export { default as tearDown } from "./tearDown.js";
 export type {
   DescribeContext,
   Engine,
   Mount,
+  Ran,
   RunContext,
   RunPhase,
   RunSpec,
