@@ -9,7 +9,9 @@
  * every barrel is pure, curated, and reaches one level down; an executable
  * exports nothing; a module never captures the environment at import time; a
  * specifier is relative, ends in `.js`, and crosses into another directory
- * only through that directory's barrel; and nothing reaches for a Bun
+ * only through that directory's barrel; a name the lib barrel mints and no
+ * entry module admits carries `@package` on its definition; and nothing
+ * reaches for a Bun
  * global, because the package runs under Node.
  *
  * Every clause is mechanical, and none is expressible in a type system —
@@ -43,6 +45,7 @@ import {
   checkMembers,
   checkRuntime,
   checkSpecifiers,
+  checkVisibility,
   EXECUTABLES,
   FILE_SIZE_THRESHOLD,
   type Package,
@@ -406,6 +409,25 @@ const probes: readonly {
       return reported;
     },
   },
+  {
+    rule: "visibility/package-tag",
+    run: () => {
+      const { checked, reported } = parsed("a.ts", "export const a = 1;");
+      checkVisibility(checked, new Set(["a"]), new Set());
+      return reported;
+    },
+  },
+  {
+    rule: "visibility/admitted-untagged",
+    run: () => {
+      const { checked, reported } = parsed(
+        "a.ts",
+        "/** @package */\nexport default function a() {}",
+      );
+      checkVisibility(checked, new Set(["a"]), new Set(["a"]));
+      return reported;
+    },
+  },
 ];
 
 const unproven = probes.filter(
@@ -427,6 +449,27 @@ checkMembers(entries, isDirectory, pkg, (file, rule, message) => {
 
 const files = entries.filter((path) => path.endsWith(".ts"));
 
+/** The names a barrel re-exports, read from its named export clauses. */
+const mintedBy = (file: string) => {
+  const { source } = parsed(
+    file,
+    readFileSync(resolve(root, file), "utf8"),
+  ).checked;
+  return source.statements.flatMap((statement) =>
+    ts.isExportDeclaration(statement) &&
+    statement.exportClause &&
+    ts.isNamedExports(statement.exportClause)
+      ? statement.exportClause.elements.map((element) => element.name.text)
+      : [],
+  );
+};
+// The lib barrel's names against the entry modules': every name minted there
+// and admitted by none of them carries `@package` on its definition.
+const minted = new Set(mintedBy(posix.join(SRC, "lib", "index.ts")));
+const admitted = new Set(
+  [...pkg.entryModules].flatMap((entry) => mintedBy(posix.join(SRC, entry))),
+);
+
 for (const file of files) {
   const text = readFileSync(resolve(root, file), "utf8");
   const { checked, reported } = parsed(file, text);
@@ -443,6 +486,7 @@ for (const file of files) {
   if (!test) {
     checkCallTimeReads(checked);
     checkDocumentation(checked, isBarrel);
+    checkVisibility(checked, minted, admitted);
     if (isBarrel) {
       checkBarrel(checked);
     } else if (EXECUTABLES.has(member)) {

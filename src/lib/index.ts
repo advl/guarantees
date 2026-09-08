@@ -3,6 +3,8 @@
  *
  * The lib barrel: every name a domain barrel mints, in one place, so that the
  * entry modules at the top of `src/` reach one level down and no deeper.
+ * A name minted here and admitted by no entry module carries `@package` on
+ * its definition, and `check:structure` holds the two lists to each other.
  */
 export {
   computeBudget,
