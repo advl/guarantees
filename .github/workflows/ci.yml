@@ -31,9 +31,11 @@ jobs:
   gate:
     name: Gate
     runs-on: ubuntu-latest
-    # Real work here is under a minute; anything past this is a hung process,
-    # and the default is 360 minutes of billed runner time.
-    timeout-minutes: 10
+    # The integration suite builds the base image — two base pulls and a
+    # toolchain install inside the build — and runs containers against the
+    # runner's engine, which is a few minutes cold; anything past this is a
+    # hung process, and the default is 360 minutes of billed runner time.
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

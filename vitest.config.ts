@@ -1,8 +1,33 @@
 import { defineConfig } from "vitest/config";
 
+const INTEGRATION = "src/_testing/integration";
+
 export default defineConfig({
   test: {
-    include: ["src/**/*.test.ts"],
+    projects: [
+      // Everything that runs without an engine: `vitest run --project unit`
+      // is the suite on a machine with nothing to start a container with.
+      {
+        test: {
+          name: "unit",
+          include: ["src/**/*.test.ts"],
+          exclude: [`${INTEGRATION}/**`],
+        },
+      },
+      // Everything that runs against the real engine, one file at a time:
+      // the files share one engine and one image store. The deadline per
+      // test is wide because a test here builds and runs containers.
+      {
+        test: {
+          name: "integration",
+          include: [`${INTEGRATION}/**/*.test.ts`],
+          fileParallelism: false,
+          testTimeout: 180_000,
+          hookTimeout: 120_000,
+          globalSetup: ["src/_testing/prepareEngine.ts"],
+        },
+      },
+    ],
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

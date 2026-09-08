@@ -19,7 +19,7 @@ const declared = fileURLToPath(
 );
 
 describe("@aztlan/guarantees", () => {
-  it("publishes exactly the values of the pure domains", () => {
+  it("publishes exactly the values of the pure domains and the impure ones an embedder needs", () => {
     expect(Object.keys(source).sort()).toEqual([
       "CEILINGS",
       "CONTRACT_VERSION",
@@ -40,12 +40,16 @@ describe("@aztlan/guarantees", () => {
       "markerSchema",
       "parseRegister",
       "planTier",
+      "probeEngine",
       "probeSchema",
       "readProbe",
       "readReport",
+      "reapStale",
       "registerSchema",
       "reportSchema",
+      "resolveImage",
       "rewriteRunBudget",
+      "runEntry",
       "toExitCode",
     ]);
   });
@@ -54,20 +58,27 @@ describe("@aztlan/guarantees", () => {
     expect(listDeclaredExports(declared)).toEqual(
       [
         ...Object.keys(source),
+        "type Engine",
         "type ExitCode",
         "type Expect",
+        "type ImageRef",
         "type Isolation",
         "type Kind",
         "type Measurement",
         "type Phase",
         "type Plan",
         "type Probe",
+        "type Ran",
         "type Reading",
         "type Pipeline",
         "type Register",
         "type RegisterFault",
         "type Row",
         "type RunBudget",
+        "type RunContext",
+        "type Spawn",
+        "type SpawnOptions",
+        "type Spawned",
         "type Stamp",
         "type Summary",
         "type Tier",

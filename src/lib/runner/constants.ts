@@ -1,0 +1,38 @@
+/**
+ * The runner's binary, at the image's root. The repository is bind-mounted
+ * at `WORKSPACE` when an entry runs, so a binary installed anywhere under it
+ * would be covered by the mount; at `/node_modules` no mount can cover it,
+ * and node's upward resolution finds the toolchain beside it from any
+ * working directory.
+ *
+ * @package
+ */
+export const RUNNER_BIN = "/node_modules/.bin/vitest";
+
+/** Where the repository is mounted inside a container, read-only. @package */
+export const WORKSPACE = "/workspace";
+
+/**
+ * The corpus's scratch directory: one subdirectory per entry, the one place
+ * an entry can write, and the lifted reports. Spelled here because the
+ * runner is told to collect nothing under it and a run mounts an entry's
+ * subdirectory writable, and the two agree by reading one constant.
+ *
+ * @package
+ */
+export const WORK_DIR = ".work";
+
+/** Where a run's report is lifted to when its entry's directory is removed, under `WORK_DIR`. @package */
+export const REPORTS_DIR = "reports";
+
+/** The report the runner writes under the entry's work directory. @package */
+export const REPORT_FILE = "report.json";
+
+/**
+ * The suffix the runner collects: what a caller hands `parseRegister` as the
+ * pipeline's `collects`, so the register and the runner hold a row's file to
+ * one rule.
+ *
+ * @package
+ */
+export const COLLECTS = ".test.ts";

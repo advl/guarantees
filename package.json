@@ -10,6 +10,10 @@
       "types": "./dist/types/index.d.ts",
       "default": "./dist/esm/index.js"
     },
+    "./vitest": {
+      "types": "./dist/types/vitest.d.ts",
+      "default": "./dist/esm/vitest.js"
+    },
     "./contract": {
       "types": "./dist/types/contract.d.ts",
       "default": "./dist/esm/contract.js"
@@ -62,6 +66,9 @@
     "@vitest/coverage-v8": "4.1.10",
     "typescript": "5.9.3",
     "vitest": "4.1.10"
+  },
+  "peerDependencies": {
+    "vitest": "^4"
   },
   "dependencies": {
     "smol-toml": "1.7.1"

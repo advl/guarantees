@@ -14,6 +14,7 @@ export { default as checkImplementation } from "./checkImplementation.js";
 export { default as checkMembers } from "./checkMembers.js";
 export { default as checkRuntime } from "./checkRuntime.js";
 export { default as checkSpecifiers } from "./checkSpecifiers.js";
+export { default as checkVisibility } from "./checkVisibility.js";
 export {
   COLLECTIONS,
   EXECUTABLES,
