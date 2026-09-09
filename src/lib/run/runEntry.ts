@@ -26,9 +26,11 @@ import type { Ran, RunContext, RunPhase } from "./types.js";
  * the seconds of the measured phase alone, which is what a budget is set
  * from.
  *
- * The previous run's lifted report is forgotten first, so a run that stops
- * before lifting never leaves an older report standing under this run's
- * name. The work directory is cleared before the build phase and not only
+ * The previous run's lifted report and the previous run's lifted files are
+ * forgotten first, so a run that stops before lifting never leaves an older
+ * report standing under this run's name, nor an earlier run's generated
+ * files for an accept to read as this run's. The work directory is cleared
+ * before the build phase and not only
  * after the run, because an interrupted earlier run is not a path the
  * teardown controls, and what it leaves is a stale product standing in for
  * a fixture and a stale report standing in for a verdict; it is created now
@@ -75,9 +77,9 @@ export default async function runEntry(
   const spawn = context.spawn ?? spawnProcess;
   const checkout = hashCheckout(context.repositoryRoot);
   const workDir = join(context.corpusRoot, WORK_DIR, row.id);
-  rmSync(join(context.corpusRoot, WORK_DIR, REPORTS_DIR, `${row.id}.json`), {
-    force: true,
-  });
+  const reports = join(context.corpusRoot, WORK_DIR, REPORTS_DIR);
+  rmSync(join(reports, `${row.id}.json`), { force: true });
+  rmSync(join(reports, row.id), { recursive: true, force: true });
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
 
@@ -127,6 +129,12 @@ export default async function runEntry(
       );
     }
 
+    // Bound where it is written and not hoisted beside `judged`, which is
+    // read after this function returns and has to be. A hoisted binding
+    // needs a starting value, and the freshness guards this date feeds
+    // compare a file's own date against it with `<`: the epoch is the one
+    // value that silences both of them, and silently. Declared here, no
+    // `Ran` can leave carrying a mark no run made.
     const startedAt = _writeMarker(workDir, row.id, process.pid);
     // The report path is relative to the corpus directory, which is the
     // measured run's working directory inside the container.
@@ -143,8 +151,14 @@ export default async function runEntry(
     if (ran.killed) {
       return {
         ok: false,
-        reason: `${row.id} was killed at ${seconds.toFixed(1)}s — ${KILL_MULTIPLIER} times its budget of ${row.run.budget}s`,
+        // The class the budget was measured on is named here because a
+        // kill is where it matters: a budget taken on one machine and
+        // enforced on another reports a breach that is a fact about the
+        // two machines, and a message naming only the entry sends a
+        // reader to the entry.
+        reason: `${row.id} was killed at ${seconds.toFixed(1)}s — ${KILL_MULTIPLIER} times its budget of ${row.run.budget}s, measured on ${row.run.class}`,
         seconds,
+        startedAt,
       };
     }
     const report = _readWrittenReport(workDir);
@@ -155,7 +169,7 @@ export default async function runEntry(
     }
     const verdict = judgeRun(row, report, startedAt);
     judged = true;
-    return { ...verdict, seconds };
+    return { ...verdict, seconds, startedAt };
   };
 
   const settled = await attempt().then(
@@ -178,5 +192,6 @@ export default async function runEntry(
     ok: false,
     reason: `${settled.ran.reason}; and the teardown of ${row.id} faulted: ${faults.join("; ")}`,
     seconds: settled.ran.seconds,
+    startedAt: settled.ran.startedAt,
   };
 }

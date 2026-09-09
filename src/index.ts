@@ -7,6 +7,8 @@
  * name. Importing this module has no side effects.
  */
 export {
+  type Accepted,
+  acceptGolden,
   CEILINGS,
   CONTRACT_VERSION,
   computeBudget,

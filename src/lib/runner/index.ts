@@ -8,6 +8,7 @@
  */
 export {
   COLLECTS,
+  LIFT_DIR,
   REPORT_FILE,
   REPORTS_DIR,
   RUNNER_BIN,

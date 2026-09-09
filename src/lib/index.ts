@@ -28,6 +28,11 @@ export {
   reportSchema,
 } from "./contract/index.js";
 export {
+  type Accepted,
+  acceptGolden,
+  GOLDENS_DIR,
+} from "./golden/index.js";
+export {
   type Built,
   buildImage,
   CONTAINERFILE,
@@ -93,6 +98,7 @@ export {
 export {
   COLLECTS,
   defineCorpusConfig,
+  LIFT_DIR,
   listCollected,
   REPORT_FILE,
   REPORTS_DIR,

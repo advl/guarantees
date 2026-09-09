@@ -36,3 +36,14 @@ export const REPORT_FILE = "report.json";
  * @package
  */
 export const COLLECTS = ".test.ts";
+
+/**
+ * The one directory under an entry's work directory whose contents outlive
+ * the run. Teardown removes `.work/<id>` on every path, so what an entry
+ * generated for a golden has no other route out of the container; it is
+ * spelled here beside the rest of the corpus layout because the run lifts
+ * it and the golden reads it, and the two agree by reading one constant.
+ *
+ * @package
+ */
+export const LIFT_DIR = "lift";

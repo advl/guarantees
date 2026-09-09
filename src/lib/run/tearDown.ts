@@ -2,6 +2,7 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   rmSync,
   statSync,
   utimesSync,
@@ -9,7 +10,12 @@ import {
 import { join } from "node:path";
 import { spawnProcess } from "../process/index.js";
 import { type Row, UNMEASURED_S } from "../register/index.js";
-import { REPORT_FILE, REPORTS_DIR, WORK_DIR } from "../runner/index.js";
+import {
+  LIFT_DIR,
+  REPORT_FILE,
+  REPORTS_DIR,
+  WORK_DIR,
+} from "../runner/index.js";
 import _listLabelled from "./_listLabelled.js";
 import _removeContainer from "./_removeContainer.js";
 import { CORPUS_LABEL, ENTRY_LABEL, TASK_FACE } from "./constants.js";
@@ -42,8 +48,20 @@ import type { RunContext } from "./types.js";
  * runner writes its report before its own teardown hooks finish, so a
  * container killed at its deadline can leave a passing report beside a red
  * verdict, and a report the reader refused is the account of no verdict;
- * lifted under the run's name, either would be read as one. A work
- * directory that could not be removed is the last fault.
+ * lifted under the run's name, either would be read as one.
+ *
+ * What the entry generated for a golden leaves the same way and under the
+ * same condition. An entry writes it under `lift/` inside its work
+ * directory, which is the only writable path it has, and the removal below
+ * takes that directory with everything else; the copy to a sibling of the
+ * report is the one route out of the container, and it is taken only when a
+ * verdict was judged, because files a killed or refused run left behind are
+ * not an account of what the artifact is. The dates the runner gave them
+ * are kept, so a caller can ask whether this run generated them. What a
+ * lift holds is a flat set of files, one per unit a golden pins; a
+ * directory there is named as a fault rather than flattened or copied in
+ * silence, since either would leave a reader guessing which of the two
+ * happened. A work directory that could not be removed is the last fault.
  *
  * @note Impure — spawns the engine and the task face, and removes the work
  * directory.
@@ -95,13 +113,32 @@ export default async function tearDown(
 
   const workDir = join(context.corpusRoot, WORK_DIR, row.id);
   const report = join(workDir, REPORT_FILE);
+  const reports = join(context.corpusRoot, WORK_DIR, REPORTS_DIR);
   if (judged && existsSync(report)) {
-    const reports = join(context.corpusRoot, WORK_DIR, REPORTS_DIR);
     mkdirSync(reports, { recursive: true });
     const lifted = join(reports, `${row.id}.json`);
     copyFileSync(report, lifted);
     const { atime, mtime } = statSync(report);
     utimesSync(lifted, atime, mtime);
+  }
+
+  const lift = join(workDir, LIFT_DIR);
+  if (judged && existsSync(lift)) {
+    const carried = join(reports, row.id);
+    mkdirSync(carried, { recursive: true });
+    for (const entry of readdirSync(lift, { withFileTypes: true })) {
+      if (!entry.isFile()) {
+        faults.push(
+          `${WORK_DIR}/${row.id}/${LIFT_DIR} holds \`${entry.name}\`, which is not a file — what an entry lifts is a flat set of files, one per unit a golden pins, and a directory there is generated evidence this leaves behind rather than carries out`,
+        );
+        continue;
+      }
+      const from = join(lift, entry.name);
+      const to = join(carried, entry.name);
+      copyFileSync(from, to);
+      const { atime, mtime } = statSync(from);
+      utimesSync(to, atime, mtime);
+    }
   }
   // A removal that could not complete throws, and the throw is the
   // verification: a directory that is still there is a stale product

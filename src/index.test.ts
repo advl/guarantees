@@ -32,6 +32,7 @@ describe("@aztlan/guarantees", () => {
       "RegisterRefusal",
       "TIERS",
       "UNMEASURED_S",
+      "acceptGolden",
       "computeBudget",
       "computeP95",
       "judgeRun",
@@ -58,6 +59,7 @@ describe("@aztlan/guarantees", () => {
     expect(listDeclaredExports(declared)).toEqual(
       [
         ...Object.keys(source),
+        "type Accepted",
         "type Engine",
         "type ExitCode",
         "type Expect",
