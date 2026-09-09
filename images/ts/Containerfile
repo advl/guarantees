@@ -22,6 +22,12 @@ COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 # function of those two files and of nothing the registry served on the day.
 # The build context is the repository root, which is why the paths carry the
 # directory.
+#
+# The build is asked for a fixed timestamp, and that is what makes the digest
+# of this definition reproduce. A layer archive carries the modification time
+# of every file in it, so two builds of these same lines minutes apart differ
+# in bytes and hash to two digests; dated at one instant they are identical.
+# It is the reason a corpus can pin an image it builds itself.
 WORKDIR /
 COPY images/ts/package.json images/ts/bun.lock /
 RUN bun install --frozen-lockfile && rm -rf /root/.bun/install/cache

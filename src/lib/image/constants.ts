@@ -10,6 +10,23 @@ export const CONTAINERFILE = "Containerfile";
 export const PINNED_FILE = "pinned.toml";
 
 /**
+ * What a build of this repository's own image is named on the machine that
+ * built it, before the name of the directory it is defined in. It is a
+ * local name and never the published one: what the rows pin is pushed by
+ * the pipeline under a name that job owns, and a build here is only ever
+ * asked whether the definition still builds and what it hashes to.
+ * Spelled here because the command that builds and the suite that builds
+ * under a tag of its own would otherwise be two spellings of one
+ * convention.
+ *
+ * @package
+ */
+export const LOCAL_PREFIX = "localhost/guarantees";
+
+/** The image directory a command means when it is given no name. @package */
+export const DEFAULT_IMAGE = "ts";
+
+/**
  * The shape of a pinned reference, read from the register schema's image
  * column so a pinned record and a row name an image by one rule.
  *

@@ -10,9 +10,11 @@ import type { ImageRef } from "./types.js";
  * of an image in local storage carrying that digest, whatever name it is
  * filed under, or else the reference itself once it has been pulled.
  *
- * Local first is what lets an image be built here, used here and pushed
- * later without a row changing: the digest is the identity, and the
- * registry is only where a machine that lacks it goes looking. The engine
+ * Local first because the digest is the identity and the registry is only
+ * where a machine that lacks the image goes looking: a machine that already
+ * holds it — this repository's own integration suite, which builds it —
+ * runs against what it has rather than fetching a second copy of the same
+ * bytes. The engine
  * reports a pulled multi-platform image under two digests — the list's and
  * the platform's — in different fields, so both `.Digest` and `.RepoDigests`
  * are searched. A pull that opens a connection and stalls is reported as
@@ -72,7 +74,7 @@ export default async function resolveImage(
   }
   if (pulled.code !== 0) {
     throw new Refusal(
-      `${reference} is neither in local storage nor pullable — build it from its definition, or push it once so a machine that cannot build it can pull it`,
+      `${reference} is neither in local storage nor pullable — a row pins the image the pipeline published, so either that digest was never pushed or this machine cannot reach the registry it was pushed to`,
     );
   }
   return { digest, reference };

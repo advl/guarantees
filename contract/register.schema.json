@@ -95,6 +95,14 @@
       ],
       "description": "What sort of fact the row pins. The kinds in `$defs/pooledKinds` run as a pool; every other kind runs one at a time after the pool drains, as does any row that declares `holds`."
     },
+    "buildFlags": {
+      "const": [
+        "--timestamp",
+        "0",
+        "--omit-history"
+      ],
+      "description": "What the engine is asked for when an image is built, beyond its definition: every layer dated at one instant and no build history in the image configuration. Without them one definition answers a new digest on every build, and the job that publishes the image would repoint every row each time it ran. They do not make a digest reproduce across machines and nothing does — a layer is an archive of a filesystem rather than the filesystem — which is why an image is published once and fetched by digest rather than rebuilt, and why what a record pins the definition by is a hash over its files."
+    },
     "pooledKinds": {
       "const": [
         "conformance",

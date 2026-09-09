@@ -5,9 +5,18 @@
  * @package
  */
 export type Pinned = {
-  /** The image, digest-pinned, as a row names it. */
+  /**
+   * The image, digest-pinned, as a row names it. It is the digest the
+   * pipeline published, so a machine that lacks the image fetches it by
+   * this reference rather than building one of its own.
+   */
   readonly digest: string;
-  /** `sha256:<hex>` over the directory's files, as `hashImageInputs` computes it. */
+  /**
+   * `sha256:<hex>` over the directory's files, as `hashImageInputs`
+   * computes it. It is the claim any machine can make about the definition
+   * without an engine and without a build, and it is what says whether a
+   * rebuild was a rebuild of the same definition.
+   */
   readonly inputs: string;
 };
 
@@ -33,9 +42,15 @@ export type Built = {
    */
   readonly id: string;
   /**
-   * The digest of the image as built here. It is this build's identity
-   * only: the same definition on a cold cache yields another, so it says
-   * nothing about whether the definition changed.
+   * The digest of the image as built here. Every layer is dated at the
+   * epoch and no build history is written, so this reproduces on the
+   * machine that took it: the same definition built there again answers the
+   * same digest, which is what keeps the pipeline republishing one digest
+   * for one definition rather than a new one per run. It is not what a row
+   * pins — a row pins the digest the pipeline pushed, and a build on
+   * another machine, or under another engine version, answers a different
+   * one, since a layer is an archive of a filesystem rather than the
+   * filesystem.
    */
   readonly localDigest: string;
   /** `sha256:<hex>` over the directory's files, which is what says whether the definition changed. */

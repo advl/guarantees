@@ -116,6 +116,22 @@ const ID = {
  */
 const POOLED_KINDS = ["conformance", "oracle", "determinism"] as const;
 
+/**
+ * What an image build is asked for beyond its definition, carried inside
+ * the register schema as `$defs.buildFlags`.
+ *
+ * A row pins an image by the digest of a build, and that digest is a
+ * function of these two arguments as much as of the files: dated at a fixed
+ * instant the layer archives are identical between two builds minutes
+ * apart, and with the build history omitted the image configuration carries
+ * none of the engine's own bookkeeping about the build, including the
+ * throwaway name it mints for a stage it materialises. An implementation
+ * that built the same definition without them would answer a digest no row
+ * here names and no reader could account for, so the arguments are data in
+ * the file rather than a habit of one command.
+ */
+const BUILD_FLAGS = ["--timestamp", "0", "--omit-history"] as const;
+
 const RECIPES = {
   type: "array",
   items: { type: "string", minLength: 1 },
@@ -173,6 +189,11 @@ export const registerSchema = {
       ],
       description:
         "What sort of fact the row pins. The kinds in `$defs/pooledKinds` run as a pool; every other kind runs one at a time after the pool drains, as does any row that declares `holds`.",
+    },
+    buildFlags: {
+      const: BUILD_FLAGS,
+      description:
+        "What the engine is asked for when an image is built, beyond its definition: every layer dated at one instant and no build history in the image configuration. Without them one definition answers a new digest on every build, and the job that publishes the image would repoint every row each time it ran. They do not make a digest reproduce across machines and nothing does — a layer is an archive of a filesystem rather than the filesystem — which is why an image is published once and fetched by digest rather than rebuilt, and why what a record pins the definition by is a hash over its files.",
     },
     pooledKinds: {
       const: POOLED_KINDS,
