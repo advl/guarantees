@@ -73,6 +73,14 @@ describe("describeRun", () => {
     }
   });
 
+  it("covers the repository's own install and leaves the corpus's own visible", () => {
+    for (const phase of ["build", "measured"] as const) {
+      expect(describeRun(walled, context(phase)).masks).toEqual([
+        `${WORKSPACE}/node_modules`,
+      ]);
+    }
+  });
+
   it("mounts a corpus at the repository root straight under the workspace", () => {
     const spec = describeRun(walled, {
       ...context("measured"),

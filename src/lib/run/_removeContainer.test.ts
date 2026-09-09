@@ -8,7 +8,7 @@ import type { Engine } from "./index.js";
 const engine: Engine = { binary: "engine", version: "1" };
 
 describe("_removeContainer", () => {
-  it("removes the named container by force, at once, and treats an absent one as removed", async () => {
+  it("removes the named container by force, at once, with the volumes it owns, and treats an absent one as removed", async () => {
     const { spawn, calls } = fakeSpawn();
     await _removeContainer(engine, spawn, "guarantees-x-measured-1");
     expect(calls).toEqual([
@@ -17,6 +17,7 @@ describe("_removeContainer", () => {
         args: [
           "rm",
           "--force",
+          "--volumes",
           "--time",
           "0",
           "--ignore",

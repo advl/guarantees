@@ -28,6 +28,13 @@ export type RunSpec = {
   readonly labels: { readonly corpus: string; readonly entry: string };
   readonly image: string;
   readonly mounts: readonly Mount[];
+  /**
+   * Container paths covered by a volume of their own, so that what the
+   * workspace mount exposes underneath them cannot be resolved through. Each
+   * is a path and no host side, which is what makes the volume empty and
+   * this container's alone.
+   */
+  readonly masks: readonly string[];
   readonly workdir: string;
   readonly network: boolean;
   /** When the container is removed, in seconds from its start. */

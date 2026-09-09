@@ -46,7 +46,15 @@ describe("_callEngine", () => {
     expect(ran.killed).toBe(true);
     expect(calls.map((call) => call.args)).toEqual([
       ["run", "image"],
-      ["rm", "--force", "--time", "0", "--ignore", "guarantees-x-measured-1"],
+      [
+        "rm",
+        "--force",
+        "--volumes",
+        "--time",
+        "0",
+        "--ignore",
+        "guarantees-x-measured-1",
+      ],
     ]);
   });
 });
