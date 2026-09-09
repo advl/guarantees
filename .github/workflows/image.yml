@@ -1,0 +1,63 @@
+name: Base image
+
+# The image a corpus runs in is published from here and pulled everywhere,
+# which is what lets a row pin it by digest at all. A manifest digest is
+# computed over the configuration a build toolchain emits, and two machines
+# building one definition answer two digests — the files inside are identical
+# and the archive of them is not. So the digest is not something a machine
+# reproduces; it is something one machine publishes and every other machine
+# fetches, this repository's own pipeline included.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "images/**"
+      - ".github/workflows/image.yml"
+
+# Publishing is the whole job, and it writes to the registry attached to this
+# repository. Pushing from here is also what ties the package to the
+# repository, which is what lets the corpus job read it with the token it is
+# handed rather than with a credential somebody has to store.
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Sign in to the registry
+        run: podman login ghcr.io --username "${{ github.actor }}" --password-stdin <<< "${{ secrets.GITHUB_TOKEN }}"
+
+      # The build context is the repository root, because the definition
+      # copies the corpus toolchain's manifest and lockfile into the image.
+      - name: Build the image
+        run: podman build --timestamp 0 --file images/ts/Containerfile --tag ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest .
+
+      - name: Publish the image
+        run: podman push ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest
+
+      # The digest is the line every row pins and the line the record carries,
+      # so the job prints it where a reader of the run can copy it, and prints
+      # the inputs hash beside it — the hash is over the files the definition
+      # is built from, is the same on every machine, and is what says whether
+      # a rebuild was a rebuild of the same definition.
+      - name: Report what to pin
+        run: |
+          digest="$(podman inspect --format '{{index .RepoDigests 0}}' ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest)"
+          {
+            echo "### The image this run published"
+            echo
+            echo '```toml'
+            echo "digest = \"$digest\""
+            sed -n 's/^inputs/inputs/p' images/ts/pinned.toml
+            echo '```'
+            echo
+            echo "Write that digest into every row's \`image\` and into \`images/ts/pinned.toml\`; the image tie is red until the record, the rows and the tree agree."
+          } >> "$GITHUB_STEP_SUMMARY"
