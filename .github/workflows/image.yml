@@ -19,6 +19,13 @@ on:
 # repository. Pushing from here is also what ties the package to the
 # repository, which is what lets the corpus job read it with the token it is
 # handed rather than with a credential somebody has to store.
+#
+# The name carries the image's flavour because the package publishes a base
+# and a repository derives its own from it: a derived image is that
+# repository's package, under that repository's name, and this one is only
+# ever the base. A package the pipeline did not create is a package the
+# pipeline cannot write to, the registry answering 403 on a name attached to
+# nothing, so the name here is one this job made.
 permissions:
   contents: read
   packages: write
@@ -38,10 +45,10 @@ jobs:
       # The build context is the repository root, because the definition
       # copies the corpus toolchain's manifest and lockfile into the image.
       - name: Build the image
-        run: podman build --timestamp 0 --file images/ts/Containerfile --tag ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest .
+        run: podman build --timestamp 0 --file images/ts/Containerfile --tag ghcr.io/${{ github.repository_owner }}/guarantees-base-ts:latest .
 
       - name: Publish the image
-        run: podman push ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest
+        run: podman push ghcr.io/${{ github.repository_owner }}/guarantees-base-ts:latest
 
       # The digest is the line every row pins and the line the record carries,
       # so the job prints it where a reader of the run can copy it, and prints
@@ -50,7 +57,7 @@ jobs:
       # a rebuild was a rebuild of the same definition.
       - name: Report what to pin
         run: |
-          digest="$(podman inspect --format '{{index .RepoDigests 0}}' ghcr.io/${{ github.repository_owner }}/guarantees-ts:latest)"
+          digest="$(podman inspect --format '{{index .RepoDigests 0}}' ghcr.io/${{ github.repository_owner }}/guarantees-base-ts:latest)"
           {
             echo "### The image this run published"
             echo
