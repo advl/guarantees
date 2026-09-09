@@ -1,7 +1,7 @@
 import { isAbsolute, join, posix, relative, sep } from "node:path";
 import { Refusal } from "../contract/index.js";
 import { type Row, UNMEASURED_S } from "../register/index.js";
-import { WORK_DIR, WORKSPACE } from "../runner/index.js";
+import { INSTALL_DIR, WORK_DIR, WORKSPACE } from "../runner/index.js";
 import {
   CORPUS_LABEL,
   ENTRY_LABEL,
@@ -9,9 +9,6 @@ import {
   NAME_PREFIX,
 } from "./constants.js";
 import type { DescribeContext, RunSpec } from "./types.js";
-
-/** What a package manager installs into, at the root of the repository. */
-const INSTALL_DIR = "node_modules";
 
 /**
  * The shape of one container run, as data, before anything starts.

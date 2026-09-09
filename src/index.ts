@@ -4,7 +4,9 @@
  * The package index: the curated public surface of `@aztlan/guarantees`.
  *
  * Every value a consumer imports from the package root is admitted here by
- * name. Importing this module has no side effects.
+ * name. Nothing here has a side effect of its own; the load is not free,
+ * because every entry re-exports from the one lib barrel and that barrel
+ * mints the selftest bodies, which import the runner.
  */
 export {
   type Accepted,

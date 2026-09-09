@@ -10,6 +10,10 @@
       "types": "./dist/types/index.d.ts",
       "default": "./dist/esm/index.js"
     },
+    "./selftest": {
+      "types": "./dist/types/selftest.d.ts",
+      "default": "./dist/esm/selftest.js"
+    },
     "./vitest": {
       "types": "./dist/types/vitest.d.ts",
       "default": "./dist/esm/vitest.js"
