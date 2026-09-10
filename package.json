@@ -24,6 +24,9 @@
     },
     "./contract/*.schema.json": "./contract/*.schema.json"
   },
+  "bin": {
+    "guarantees": "dist/esm/bin/guarantees.js"
+  },
   "files": [
     "dist",
     "contract"

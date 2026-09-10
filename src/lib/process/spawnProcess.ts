@@ -29,8 +29,23 @@ export default function spawnProcess(
   options: SpawnOptions,
 ): Promise<Spawned> {
   return new Promise((resolve, reject) => {
+    // The child inherits this process's environment with one variable
+    // emptied. A coverage collector tells the process it instruments where
+    // to write by putting that directory in the environment, and a node
+    // child left to inherit it writes its own profile into a directory the
+    // collector owns, empties and removes underneath it: what surfaces is
+    // the collector failing to read a file that vanished, naming neither
+    // the child nor the spawn that started it, on some runs and not
+    // others. Emptied rather than removed, because the runtime puts it
+    // back: a process running under coverage passes it to every child it
+    // starts, so a key deleted from the environment handed in here arrives
+    // in the child anyway, and the empty value is what says no profile.
+    // Every other variable is inherited, which is what lets a caller's own
+    // PATH find the engine.
+    const environment = { ...process.env, NODE_V8_COVERAGE: "" };
     const child = spawn(binary, args, {
       cwd: options.cwd,
+      env: environment,
       stdio: ["ignore", options.capture ? "pipe" : "inherit", "inherit"],
     });
     const chunks: Buffer[] = [];

@@ -1,12 +1,5 @@
-import { Refusal, registerSchema } from "../contract/index.js";
-
-/**
- * How many measured windows a budget is set from, read from the one place
- * the register schema states it. Fewer is not the rule's p95: the estimator
- * is defined over the count the contract names, so a budget set from three
- * windows would answer to a different rule than the one a reader checks.
- */
-const { runs } = registerSchema.$defs.limits.const.budget;
+import { Refusal } from "../contract/index.js";
+import { BUDGET_RUNS } from "./constants.js";
 
 /**
  * The p95 of an entry's measured windows, in seconds, by nearest rank: the
@@ -20,9 +13,9 @@ const { runs } = registerSchema.$defs.limits.const.budget;
  * when a window is not a finite, non-negative number of seconds.
  */
 export default function computeP95(seconds: readonly number[]): number {
-  if (seconds.length < runs) {
+  if (seconds.length < BUDGET_RUNS) {
     throw new Refusal(
-      `${seconds.length} measured window${seconds.length === 1 ? "" : "s"} is fewer than the ${runs} a budget is set from — a p95 of fewer runs is not the rule's p95`,
+      `${seconds.length} measured window${seconds.length === 1 ? "" : "s"} is fewer than the ${BUDGET_RUNS} a budget is set from — a p95 of fewer runs is not the rule's p95`,
     );
   }
   const unmeasured = seconds.find(

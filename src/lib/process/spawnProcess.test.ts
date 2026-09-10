@@ -72,6 +72,33 @@ describe("spawnProcess", () => {
     ).rejects.toThrow("no engine to remove with");
   });
 
+  it("empties the coverage collector's own directory out of the child's environment, and inherits the rest", async () => {
+    // A child that inherits it writes its profile into a directory the
+    // collector owns and removes, and what surfaces is the collector
+    // failing to read a file that vanished, naming neither the child nor
+    // the spawn. Emptied and not deleted: the runtime hands it to every
+    // child of a process running under coverage whatever the environment
+    // says, so an empty value is what turns it off.
+    const before = process.env.NODE_V8_COVERAGE;
+    process.env.NODE_V8_COVERAGE = "/tmp/somewhere-a-collector-owns";
+    process.env.GUARANTEES_SPAWN_PROBE = "inherited";
+    try {
+      const ran = await spawnProcess(
+        "node",
+        [
+          "-e",
+          "process.stdout.write((process.env.NODE_V8_COVERAGE ?? 'set') + process.env.GUARANTEES_SPAWN_PROBE)",
+        ],
+        { deadlineMs: LONG, capture: true },
+      );
+      expect(ran.out).toBe("inherited");
+    } finally {
+      if (before === undefined) delete process.env.NODE_V8_COVERAGE;
+      else process.env.NODE_V8_COVERAGE = before;
+      delete process.env.GUARANTEES_SPAWN_PROBE;
+    }
+  });
+
   it("rejects when the binary cannot be started", async () => {
     await expect(
       spawnProcess("no-such-engine-binary", [], { deadlineMs: LONG }),

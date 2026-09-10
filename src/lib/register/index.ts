@@ -17,6 +17,7 @@ export {
 } from "./constants.js";
 export { default as parseRegister } from "./parseRegister.js";
 export { default as RegisterRefusal } from "./RegisterRefusal.js";
+export { default as readPipeline } from "./readPipeline.js";
 export type {
   Expect,
   Isolation,
