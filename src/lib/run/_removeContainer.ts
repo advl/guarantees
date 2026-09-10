@@ -8,6 +8,13 @@ import type { Engine } from "./types.js";
  * — a running container is stopped by its removal, never by a signal to the
  * client that started it.
  *
+ * The volumes go with it. A run's masks are volumes with no host side,
+ * created for that container alone, and the engine removes them with a
+ * container that exits on its own but not with one removed by name unless
+ * it is asked to; without the flag every killed run would leave one behind
+ * on the machine forever. Only a volume the container owns is reached: a
+ * volume with a name of its own is somebody else's and is left standing.
+ *
  * @note Impure — spawns the engine.
  */
 export default function _removeContainer(
@@ -17,7 +24,7 @@ export default function _removeContainer(
 ): Promise<Spawned> {
   return spawn(
     engine.binary,
-    ["rm", "--force", "--time", "0", "--ignore", name],
+    ["rm", "--force", "--volumes", "--time", "0", "--ignore", name],
     { deadlineMs: UNMEASURED_S * 1000 },
   );
 }

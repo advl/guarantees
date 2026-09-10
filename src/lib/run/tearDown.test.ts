@@ -15,7 +15,12 @@ import { REPORT_GREEN, renderReport } from "../../_testing/fixtures.js";
 import makeCorpus, { type FixtureCorpus } from "../../_testing/makeCorpus.js";
 import type { Spawned } from "../process/index.js";
 import { UNMEASURED_S } from "../register/index.js";
-import { REPORT_FILE, REPORTS_DIR, WORK_DIR } from "../runner/index.js";
+import {
+  LIFT_DIR,
+  REPORT_FILE,
+  REPORTS_DIR,
+  WORK_DIR,
+} from "../runner/index.js";
 import {
   CORPUS_LABEL,
   ENTRY_LABEL,
@@ -134,13 +139,16 @@ describe("tearDown", () => {
     expect(existsSync(workDir)).toBe(false);
     const lifted = join(corpus.corpusRoot, WORK_DIR, REPORTS_DIR, "held.json");
     expect(readFileSync(lifted, "utf8")).toBe(renderReport(REPORT_GREEN));
-    // Within a millisecond rather than equal to it: a date reaches the
-    // filesystem as seconds and nanoseconds and comes back as a float, so the
-    // round trip drops a fraction of a millisecond on some filesystems and not
-    // on others. What is claimed is the date the runner wrote, and that date is
-    // a minute and a half in the past, so a lift stamping the report with the
-    // present instead is off by a minute and a half and still fails here.
-    expect(statSync(lifted).mtimeMs).toBeCloseTo(written.getTime(), 0);
+    // Within a second and never equal to it. A date reaches the filesystem as
+    // seconds and nanoseconds and comes back as a float, and how much of it
+    // survives is the mount's business: a filesystem keeping whole seconds
+    // answers up to a second away from what was asked, on a machine where
+    // nothing is wrong. What is claimed is the date the runner wrote, and that
+    // date is a minute and a half in the past, so a lift stamping the report
+    // with the present instead is off by ninety times this tolerance.
+    expect(Math.abs(statSync(lifted).mtimeMs - written.getTime())).toBeLessThan(
+      1_000,
+    );
   });
 
   it("lifts the report and removes the directory on a faulting path too", async () => {
@@ -152,6 +160,56 @@ describe("tearDown", () => {
     expect(existsSync(workDir)).toBe(false);
     expect(
       existsSync(join(corpus.corpusRoot, WORK_DIR, REPORTS_DIR, "held.json")),
+    ).toBe(true);
+  });
+
+  it("carries what the entry generated out of the work directory, dated as the entry wrote it", async () => {
+    const { row, context, corpus, workDir } = prepared();
+    const lift = join(workDir, LIFT_DIR);
+    mkdirSync(lift);
+    writeFileSync(join(lift, "surface.txt"), "one line per unit\n");
+    const written = new Date(Date.now() - 90_000);
+    utimesSync(join(lift, "surface.txt"), written, written);
+    expect(await tearDown(row, context, true)).toEqual([]);
+    expect(existsSync(workDir)).toBe(false);
+    const carried = join(
+      corpus.corpusRoot,
+      WORK_DIR,
+      REPORTS_DIR,
+      "held",
+      "surface.txt",
+    );
+    expect(readFileSync(carried, "utf8")).toBe("one line per unit\n");
+    // Within a second and never equal to it, for the reason above: the date
+    // the entry wrote is a minute and a half in the past, so a lift stamping
+    // the file with the present is off by ninety times this tolerance.
+    expect(
+      Math.abs(statSync(carried).mtimeMs - written.getTime()),
+    ).toBeLessThan(1_000);
+  });
+
+  it("carries nothing out of a run no verdict was judged from, whatever it generated", async () => {
+    const { row, context, corpus, workDir } = prepared();
+    mkdirSync(join(workDir, LIFT_DIR));
+    writeFileSync(join(workDir, LIFT_DIR, "surface.txt"), "generated\n");
+    await tearDown(row, context, false);
+    expect(
+      existsSync(join(corpus.corpusRoot, WORK_DIR, REPORTS_DIR, "held")),
+    ).toBe(false);
+  });
+
+  it("faults a directory under the lift and carries the files beside it, rather than flattening one or dropping the other", async () => {
+    const { row, context, corpus, workDir } = prepared();
+    const lift = join(workDir, LIFT_DIR);
+    mkdirSync(join(lift, "nested"), { recursive: true });
+    writeFileSync(join(lift, "surface.txt"), "generated\n");
+    expect(await tearDown(row, context, true)).toEqual([
+      `${WORK_DIR}/held/${LIFT_DIR} holds \`nested\`, which is not a file — what an entry lifts is a flat set of files, one per unit a golden pins, and a directory there is generated evidence this leaves behind rather than carries out`,
+    ]);
+    expect(
+      existsSync(
+        join(corpus.corpusRoot, WORK_DIR, REPORTS_DIR, "held", "surface.txt"),
+      ),
     ).toBe(true);
   });
 

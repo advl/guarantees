@@ -8,6 +8,7 @@ import {
   probeSchema,
   registerSchema,
   reportSchema,
+  UNCLAIMED_TITLE,
 } from "./index.js";
 
 const DRAFT = "https://json-schema.org/draft/2020-12/schema";
@@ -238,6 +239,17 @@ describe("contract", () => {
       expect(Object.keys(reading.properties)).toEqual([...reading.required]);
       expect(reading.additionalProperties).toBe(false);
       expect(probeSchema.$defs.phase.enum).toEqual(["cold", "warm"]);
+    });
+  });
+
+  describe("UNCLAIMED_TITLE", () => {
+    it("is the title the schema publishes, so a proof and a body read one datum", () => {
+      expect(UNCLAIMED_TITLE).toBe(
+        "claims every file the runner would collect",
+      );
+      expect(UNCLAIMED_TITLE).toBe(
+        registerSchema.$defs.prove.const.unclaimedTitle,
+      );
     });
   });
 

@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 describe("buildImage", () => {
-  it("builds the image's Containerfile with the repository root as context, tagged as asked", async () => {
+  it("builds the image's Containerfile with the repository root as context, at a fixed timestamp and without history, tagged as asked", async () => {
     const root = repository();
     const { spawn, calls } = building();
     await buildImage(engine, root, "ts", "localhost/example:x", spawn);
@@ -48,6 +48,9 @@ describe("buildImage", () => {
       binary: "engine",
       args: [
         "build",
+        "--timestamp",
+        "0",
+        "--omit-history",
         "--file",
         "images/ts/Containerfile",
         "--tag",

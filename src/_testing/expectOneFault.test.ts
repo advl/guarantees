@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import expectOneFault from "./expectOneFault.js";
 import { renderRegister, renderRow } from "./fixtures.js";
 
-const SENTINEL = renderRow("corpus-can-fail", { expect: `"fail"` });
+const SENTINEL = [
+  renderRow("corpus-bijection"),
+  renderRow("corpus-can-fail", { expect: `"fail"` }),
+].join("\n\n");
 
 describe("expectOneFault", () => {
   it("passes on a register refused for exactly the fault named", () => {

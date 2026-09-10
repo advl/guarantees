@@ -1,10 +1,17 @@
 /**
  * @module
  *
- * The lib barrel: every name a domain barrel mints, in one place, so that the
- * entry modules at the top of `src/` reach one level down and no deeper.
- * A name minted here and admitted by no entry module carries `@package` on
- * its definition, and `check:structure` holds the two lists to each other.
+ * The lib barrel: the names the entry modules at the top of `src/` choose
+ * among, in one place, so that each of them reaches one level down and no
+ * deeper. A name minted here and admitted by no entry module carries
+ * `@package` on its definition, and `check:structure` holds the two lists
+ * to each other.
+ *
+ * It is curated and not a gathering of everything below it: a name whose
+ * only readers are inside its own domain, or in one other domain that
+ * reaches it through that domain's own barrel, is minted there and stops
+ * there. Listing it here would put it one import away from the published
+ * surface and would say nothing true about what the package publishes.
  */
 export {
   computeBudget,
@@ -28,6 +35,10 @@ export {
   reportSchema,
 } from "./contract/index.js";
 export {
+  type Accepted,
+  acceptGolden,
+} from "./golden/index.js";
+export {
   type Built,
   buildImage,
   CONTAINERFILE,
@@ -47,6 +58,10 @@ export {
   type SpawnOptions,
   spawnProcess,
 } from "./process/index.js";
+export {
+  type ProveContext,
+  proveTier,
+} from "./prove/index.js";
 export {
   CEILINGS,
   type Expect,
@@ -106,6 +121,13 @@ export {
   type Plan,
   planTier,
 } from "./schedule/index.js";
+export {
+  describeBijection,
+  describeCanFail,
+  describeImageTie,
+  describeLayering,
+  describeToolchainStamp,
+} from "./selftest/index.js";
 export {
   type ExitCode,
   judgeRun,

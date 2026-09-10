@@ -60,6 +60,17 @@ export const renderRow = (
   return [`[${id}]`, ...lines].join("\n");
 };
 
+/**
+ * The two rows a register is refused without, whatever else it holds: the
+ * row a tier's proof rigs, and the row designed to fail. A fixture about
+ * one column carries them so that the refusal under test is the only one
+ * that can fire.
+ */
+export const REQUIRED_ROWS: readonly string[] = [
+  renderRow("corpus-bijection"),
+  renderRow("corpus-can-fail", { expect: `"fail"` }),
+];
+
 /** Tables joined into a register text with a trailing newline. */
 export const renderRegister = (tables: readonly string[]): string =>
   `${tables.join("\n\n")}\n`;

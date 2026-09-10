@@ -15,6 +15,7 @@ const spec: RunSpec = {
       readOnly: false,
     },
   ],
+  masks: ["/workspace/node_modules"],
   workdir: "/workspace/guarantees",
   network: false,
   deadlineS: 30,
@@ -42,6 +43,18 @@ describe("_renderRun", () => {
     expect(argv).toContain(
       "/srv/repo/guarantees/.work/x:/workspace/guarantees/.work/x",
     );
+  });
+
+  it("covers each masked path with a volume of its own, before the image and with no host side to inherit anything from", () => {
+    const argv = _renderRun(spec);
+    expect(argv.filter((arg) => arg === "-v")).toHaveLength(3);
+    const mask = "/workspace/node_modules";
+    expect(argv.at(argv.indexOf(mask) - 1)).toBe("-v");
+    expect(argv.indexOf(mask)).toBeLessThan(argv.indexOf(spec.image));
+  });
+
+  it("renders nothing for a run that masks nothing", () => {
+    const argv = _renderRun({ ...spec, masks: [] });
     expect(argv.filter((arg) => arg === "-v")).toHaveLength(2);
   });
 

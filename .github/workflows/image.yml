@@ -55,6 +55,14 @@ jobs:
       # the inputs hash beside it — the hash is over the files the definition
       # is built from, is the same on every machine, and is what says whether
       # a rebuild was a rebuild of the same definition.
+      #
+      # The hash is read from the record and the record may not be there: the
+      # publish that FIRST defines an image runs before anything has been
+      # written beside the definition, which is the run whose digest the
+      # record is then written from. So the line is printed when the file is
+      # there and passed over when it is not, rather than the reporting step
+      # failing over an absent file and taking a job that published the image
+      # down with it.
       - name: Report what to pin
         run: |
           digest="$(podman inspect --format '{{index .RepoDigests 0}}' ghcr.io/${{ github.repository_owner }}/guarantees-base-ts:latest)"
@@ -63,7 +71,9 @@ jobs:
             echo
             echo '```toml'
             echo "digest = \"$digest\""
-            sed -n 's/^inputs/inputs/p' images/ts/pinned.toml
+            if [ -f images/ts/pinned.toml ]; then
+              sed -n 's/^inputs/inputs/p' images/ts/pinned.toml
+            fi
             echo '```'
             echo
             echo "Write that digest into every row's \`image\` and into \`images/ts/pinned.toml\`; the image tie is red until the record, the rows and the tree agree."

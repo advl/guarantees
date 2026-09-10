@@ -28,6 +28,13 @@ export type RunSpec = {
   readonly labels: { readonly corpus: string; readonly entry: string };
   readonly image: string;
   readonly mounts: readonly Mount[];
+  /**
+   * Container paths covered by a volume of their own, so that what the
+   * workspace mount exposes underneath them cannot be resolved through. Each
+   * is a path and no host side, which is what makes the volume empty and
+   * this container's alone.
+   */
+  readonly masks: readonly string[];
   readonly workdir: string;
   readonly network: boolean;
   /** When the container is removed, in seconds from its start. */
@@ -71,5 +78,18 @@ export type RunContext = {
   readonly spawn?: Spawn;
 };
 
-/** A verdict together with the seconds of the measured phase alone, which is what a budget is set from. */
-export type Ran = Verdict & { readonly seconds: number };
+/**
+ * A verdict, the seconds of the measured phase alone — which is what a
+ * budget is set from — and the mark the run made before that phase opened.
+ *
+ * The mark is carried out of the run because everything a caller judges for
+ * freshness afterwards has to be compared against a time from the same
+ * filesystem: the run wrote a file and read back the date that filesystem
+ * gave it, and a caller reading the host clock instead would order the two
+ * wrongly wherever the two clocks disagree, and refuse every honest run.
+ */
+export type Ran = Verdict & {
+  readonly seconds: number;
+  /** As the filesystem the corpus lives on dates the file the run wrote. */
+  readonly startedAt: number;
+};

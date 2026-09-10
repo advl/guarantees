@@ -8,7 +8,11 @@ const INPUTS = `sha256:${"abcdef0123456789".repeat(4)}`;
 
 /** The pinned record as it is written, with one key replaced or added. */
 const render = (record: Readonly<Record<string, string | null>>) =>
-  Object.entries({ digest: `"${IMAGE_A}"`, inputs: `"${INPUTS}"`, ...record })
+  Object.entries({
+    digest: `"${IMAGE_A}"`,
+    inputs: `"${INPUTS}"`,
+    ...record,
+  })
     .filter(([, value]) => value !== null)
     .map(([key, value]) => `${key} = ${value}`)
     .join("\n");
@@ -21,9 +25,9 @@ describe("readPinned", () => {
     });
   });
 
-  it("reads a record with comments around its two keys", () => {
+  it("reads a record with comments around its keys", () => {
     expect(
-      readPinned(`# what the image was last pinned as\n${render({})}\n`),
+      readPinned(`# what the image was last published as\n${render({})}\n`),
     ).toEqual({ digest: IMAGE_A, inputs: INPUTS });
   });
 
@@ -55,6 +59,11 @@ describe("readPinned", () => {
       "a key the record does not carry",
       render({ built: '"2026-01-01"' }),
       "`built` is not a key a pinned record carries (digest, inputs)",
+    ],
+    [
+      "the engine a record used to carry, now that no version of it decides anything",
+      render({ engine: '"engine 1.2.3"' }),
+      "`engine` is not a key a pinned record carries (digest, inputs)",
     ],
   ])("refuses %s", (_, text, reason) => {
     expect(() => readPinned(text)).toThrow(Refusal);

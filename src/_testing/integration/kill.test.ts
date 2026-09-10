@@ -59,7 +59,7 @@ describe("the hard kill", () => {
     expect(ran.ok).toBe(false);
     expect(ran.reason).toMatch(
       new RegExp(
-        `^sleeper was killed at \\d+\\.\\ds — ${KILL_MULTIPLIER} times its budget of 1s$`,
+        `^sleeper was killed at \\d+\\.\\ds — ${KILL_MULTIPLIER} times its budget of 1s, measured on [a-z0-9-]+$`,
       ),
     );
     expect(ran.seconds).toBeGreaterThanOrEqual(KILL_MULTIPLIER);

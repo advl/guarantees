@@ -46,6 +46,18 @@ export const _HEADERLESS_VERSION: string =
 
 export const _EXPECTS = registerSchema.$defs.expect.enum;
 
+/**
+ * The id the row that scans the corpus carries, read from the schema so
+ * that the register and the proof which rigs that row name it from one
+ * place. A register is held to holding such a row for the reason it is held
+ * to holding a sentinel: both directions of that scan compare two lists, a
+ * scan that sees nothing compares two empty ones and stays green, and only
+ * a run of that row against a file no row claims has ever shown it able to
+ * find anything.
+ */
+export const _BIJECTION_ID: string =
+  registerSchema.$defs.prove.const.bijectionId;
+
 /** The columns, in the order a row is written. */
 export const _COLUMNS: readonly string[] = registerSchema.$defs.row.required;
 
@@ -70,10 +82,10 @@ export const _HEADROOM = registerSchema.$defs.limits.const.budget.headroom;
 /**
  * Per-tier ceilings, in seconds, from the contract's limits. `entry` bounds
  * one row's budget at parse time; `wall` bounds the wall-clock span of the
- * tier's whole schedule as it ran, judged at the tier's end and never at
- * parse time, since the budgets summed are the same number whether the rows
- * pooled or not. The release tier is per repository, absent from the
- * limits, and unbounded here.
+ * tier's whole schedule as it ran, every phase of every row included,
+ * judged at the tier's end and never at parse time, since the budgets
+ * summed are the same number whether the rows pooled or not. The release
+ * tier is per repository, absent from the limits, and unbounded here.
  */
 export const CEILINGS = {
   ...registerSchema.$defs.limits.const.ceilings,

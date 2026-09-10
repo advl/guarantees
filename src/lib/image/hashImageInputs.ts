@@ -28,14 +28,15 @@ const listFiles = (directory: string, prefix = ""): string[] =>
  *
  * A row pins its image by digest, and a digest answers which image an entry
  * ran in; it cannot answer whether that image is still the one the
- * repository describes, because a rebuild does not reproduce it: layer
- * archives carry orderings and timestamps, so the same definition on a cold
- * cache yields another digest. Files hash the same on every machine, so the
- * definition is pinned by its inputs: every file under the image's
- * directory except the pinned record, which records this hash and cannot be
- * an input to it. Each file's path is hashed before its bytes, because two
- * files exchanging contents are a different tree. An install directory
- * under the definition is skipped: the build reads the lockfile, never it.
+ * repository describes, because answering that would mean building the
+ * image on every machine that asks — and a definition edited into anything
+ * would go on being green until somebody did. Files hash the same on every
+ * machine and need no engine, so the definition is pinned by its inputs:
+ * every file under the image's directory except the pinned record, which
+ * records this hash and cannot be an input to it. Each file's path is
+ * hashed before its bytes, because two files exchanging contents are a
+ * different tree. An install directory under the definition is skipped:
+ * the build reads the lockfile, never it.
  *
  * @note Impure — reads the filesystem under `<root>/images/<name>/`.
  * @throws Refusal when the directory is missing or holds no Containerfile.

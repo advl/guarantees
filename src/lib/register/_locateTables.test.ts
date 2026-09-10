@@ -22,11 +22,13 @@ describe("parseRegister", () => {
       const text = renderRegister([
         renderRow("10"),
         renderRow("2"),
+        renderRow("corpus-bijection"),
         renderRow("corpus-can-fail", { expect: `"fail"` }),
       ]);
       expect([...parseRegister(text, PIPELINE).keys()]).toEqual([
         "10",
         "2",
+        "corpus-bijection",
         "corpus-can-fail",
       ]);
     });
@@ -47,6 +49,7 @@ describe("parseRegister", () => {
     it("points a missing column's fault at the table's header", () => {
       const text = renderRegister([
         renderRow("corpus-image", { select: null }),
+        renderRow("corpus-bijection"),
         renderRow("corpus-can-fail", { expect: `"fail"` }),
       ]);
       expectOneFault(text, {
@@ -79,6 +82,7 @@ describe("parseRegister", () => {
     it("takes a header-shaped line inside a string for a table, and refuses that table", () => {
       const text = renderRegister([
         renderRow("a", { select: `"""\n[ghost]\n"""` }),
+        renderRow("corpus-bijection"),
         renderRow("corpus-can-fail", { expect: `"fail"` }),
       ]);
       const refusal = catchRefusal(RegisterRefusal, () =>

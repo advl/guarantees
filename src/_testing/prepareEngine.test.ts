@@ -22,10 +22,14 @@ const fakeProject = () => {
   return { project, provided };
 };
 
+/** What the engine answers the tag listing the reap reads, when a test gives it one. */
+const TAG_FORMAT = "{{.Repository}}:{{.Tag}}";
+
 /** An engine that answers its version, builds, inspects and pulls as told, holding the small image already when asked to. */
 const healthy = (
   build = { code: 0, out: "", killed: false },
   holdsSmall = false,
+  tags = "",
 ) =>
   fakeSpawn(({ args }) => {
     const out = {
@@ -34,6 +38,9 @@ const healthy = (
       images: holdsSmall ? `${DIGEST} [] ${ID}` : "",
     }[args[0] ?? ""];
     if (args[0] === "build") return build;
+    if (args.includes(TAG_FORMAT)) {
+      return { code: 0, out: tags, killed: false };
+    }
     return { code: 0, out: out ?? "", killed: false };
   });
 
@@ -52,13 +59,53 @@ describe("prepareEngine", () => {
     await prepareEngine(fakeProject().project, spawn);
     expect(calls.map((call) => call.args[0])).toEqual([
       "--version",
+      "images",
       "build",
       "image",
       "images",
       "pull",
     ]);
-    expect(calls[1]?.args).toContain(TAG);
-    expect(calls[4]?.args).toEqual(["pull", SMALL_IMAGE]);
+    expect(calls[2]?.args).toContain(TAG);
+    expect(calls[5]?.args).toEqual(["pull", SMALL_IMAGE]);
+  });
+
+  it("removes a tag an earlier run left behind, and never one a running suite still holds", async () => {
+    // A tag names the process that minted it, so what is safe to remove is
+    // what no process answers to any more; a live sibling's tag may be the
+    // only name its image has, and removing it would take the image with it.
+    const dead = `${BASE_TAG_PREFIX}-2147483`;
+    const { spawn, calls } = healthy(
+      undefined,
+      false,
+      [dead, TAG, "localhost/something-else:latest"].join("\n"),
+    );
+    await prepareEngine(fakeProject().project, spawn);
+    expect(calls[2]?.args).toEqual(["rmi", "--ignore", dead]);
+  });
+
+  it("builds without removing anything when the store holds no tag of an earlier run", async () => {
+    const { spawn, calls } = healthy(undefined, false, "");
+    await prepareEngine(fakeProject().project, spawn);
+    expect(calls.map((call) => call.args[0])).not.toContain("rmi");
+  });
+
+  it("builds anyway when the engine will not say what the store holds, since the build is the answer either way", async () => {
+    const { spawn, calls } = fakeSpawn(({ args }) =>
+      args.includes(TAG_FORMAT)
+        ? { code: 1, out: "", killed: false }
+        : {
+            code: 0,
+            out:
+              args[0] === "--version"
+                ? `${ENGINE} version 9.9.9`
+                : args[0] === "image"
+                  ? `${ID.slice("sha256:".length)} sha256:${"6".repeat(64)}`
+                  : "",
+            killed: false,
+          },
+    );
+    await prepareEngine(fakeProject().project, spawn);
+    expect(calls.map((call) => call.args[0])).toContain("build");
   });
 
   it("answers a teardown that removes its own tag and the small image it pulled, ignoring what is already gone", async () => {

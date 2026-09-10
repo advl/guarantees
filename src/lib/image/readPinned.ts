@@ -10,8 +10,8 @@ const KEYS = ["digest", "inputs"] as const;
  * nothing else: the digest-pinned reference the rows name, in the shape the
  * register's image column takes, and the inputs hash in the shape
  * `hashImageInputs` answers. A key beside those is refused, because a
- * record that carries more than it is read for will one day carry
- * something somebody relies on and nothing reads.
+ * record that carries more than it is read for will one day carry something
+ * somebody relies on and nothing reads.
  *
  * @throws Refusal naming the first fault found.
  *

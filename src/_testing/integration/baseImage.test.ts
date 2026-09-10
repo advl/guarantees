@@ -15,6 +15,7 @@ import _renderRun from "../../lib/run/_renderRun.js";
 import { describeRun, reapStale } from "../../lib/run/index.js";
 import { RUNNER_BIN, WORK_DIR } from "../../lib/runner/index.js";
 import { BASE_IMAGE_NAME, BASE_TAG_PREFIX } from "../constants.js";
+import fakeSpawn from "../fakeSpawn.js";
 import makeCorpus from "../makeCorpus.js";
 import { renderPassing } from "./fixtures.js";
 
@@ -106,6 +107,59 @@ describe("the base image", () => {
     expect(built.id).toBe(baseImage);
     expect(built.localDigest).toMatch(INPUTS_PATTERN);
   });
+
+  it("answers one digest for two builds of one definition that shared no layer, so one definition publishes as one digest rather than a new one per run", async () => {
+    // Every layer rebuilt, twice, which is the only way to ask the question:
+    // a build that reuses cached layers answers the cached digest and would
+    // pass whether or not the definition reproduces. What has to agree is
+    // two runs of the publishing job over one definition — a job that
+    // answered a new digest each time would move every row on every run.
+    //
+    // The arguments come from `buildImage` rather than being written here,
+    // so the flags this measurement rests on are the ones the package
+    // actually passes: dropped there, these two builds stop agreeing and
+    // this goes red, where a copy of the argv would go on measuring itself.
+    const digests: string[] = [];
+    const minted: string[] = [];
+    try {
+      for (const round of ["first", "second"]) {
+        const tag = `${BASE_TAG_PREFIX}-${process.pid}-cold-${round}`;
+        minted.push(tag);
+        const { spawn, calls } = fakeSpawn(() => ({
+          code: 0,
+          out: "id digest",
+          killed: false,
+        }));
+        await buildImage(engine, root, BASE_IMAGE_NAME, tag, spawn);
+        const [asked] = calls;
+        if (asked === undefined)
+          throw new Error("the build asked the engine nothing");
+        await spawnProcess(
+          engine.binary,
+          ["build", "--no-cache", ...asked.args.slice(1)],
+          { cwd: root, deadlineMs: UNMEASURED_S * 1000 },
+        );
+        const inspected = await spawnProcess(
+          engine.binary,
+          ["image", "inspect", "--format", "{{.Digest}}", tag],
+          { deadlineMs: UNMEASURED_S * 1000, capture: true },
+        );
+        digests.push(inspected.out);
+      }
+    } finally {
+      // Two images of half a gigabyte each, and the intermediates the
+      // uncached builds left: a build that failed between the tag and the
+      // removal would otherwise leave them in the store with no teardown
+      // anywhere that reaches them.
+      for (const tag of minted) {
+        await spawnProcess(engine.binary, ["rmi", "--ignore", tag], {
+          deadlineMs: UNMEASURED_S * 1000,
+        });
+      }
+    }
+    expect(digests[0]).toMatch(INPUTS_PATTERN);
+    expect(digests[1]).toBe(digests[0]);
+  }, 300_000);
 
   it("carries no pinned record until it has been pushed", () => {
     expect(

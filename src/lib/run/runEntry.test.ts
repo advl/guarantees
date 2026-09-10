@@ -207,7 +207,7 @@ describe("runEntry", () => {
     expect(ran.ok).toBe(false);
     expect(ran.reason).toMatch(
       new RegExp(
-        `^entry was killed at \\d+\\.\\ds — ${KILL_MULTIPLIER} times its budget of 30s$`,
+        `^entry was killed at \\d+\\.\\ds — ${KILL_MULTIPLIER} times its budget of 30s, measured on [a-z-]+$`,
       ),
     );
     expect(calls.some((call) => call.args[0] === "rm")).toBe(true);

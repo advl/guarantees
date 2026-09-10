@@ -16,5 +16,6 @@ export {
   probeSchema,
   registerSchema,
   reportSchema,
+  UNCLAIMED_TITLE,
 } from "./constants.js";
 export { default as Refusal } from "./Refusal.js";

@@ -1,7 +1,7 @@
 import { isAbsolute, join, posix, relative, sep } from "node:path";
 import { Refusal } from "../contract/index.js";
 import { type Row, UNMEASURED_S } from "../register/index.js";
-import { WORK_DIR, WORKSPACE } from "../runner/index.js";
+import { INSTALL_DIR, WORK_DIR, WORKSPACE } from "../runner/index.js";
 import {
   CORPUS_LABEL,
   ENTRY_LABEL,
@@ -20,8 +20,13 @@ import type { DescribeContext, RunSpec } from "./types.js";
  * repository is mounted read-only at the workspace and the entry's own work
  * directory writable on top of it, at the path the corpus already promises,
  * so an entry that wrote anywhere else fails on the write rather than being
- * reported green over a tree it edited; nothing is mounted over the image's
- * toolchain. A build recipe runs from the workspace root, because it is a
+ * reported green over a tree it edited. The repository's own install is
+ * masked, because it sits directly above the corpus on the runtime's upward
+ * resolution path and would otherwise answer for every module the image
+ * installed at its root; the corpus's own install is left visible, since
+ * that is where a corpus keeps the package whose bodies its entries import.
+ * Nothing is mounted over the image's toolchain. A build recipe runs from
+ * the workspace root, because it is a
  * script of the repository's root manifest, and the measured run from the
  * corpus directory. The network is on for a build — a pinned fixture is
  * fetched there, outside the measured window — and off for the measured run
@@ -78,6 +83,7 @@ export default function describeRun(
         readOnly: false,
       },
     ],
+    masks: [posix.join(WORKSPACE, INSTALL_DIR)],
     workdir: build ? WORKSPACE : corpusInImage,
     network: build || row.isolation === "image-net",
     deadlineS: build ? UNMEASURED_S : row.run.budget * KILL_MULTIPLIER,

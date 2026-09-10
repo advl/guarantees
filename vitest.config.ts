@@ -37,6 +37,12 @@ export default defineConfig({
       // except a hole any runtime value dropped into such a file falls
       // straight through.
       exclude: ["**/*.test.ts", "**/*.d.ts"],
+      // The report is written on a red run as well as a green one. A run
+      // that failed is the one whose coverage a reader wants, and without
+      // this the numbers are printed only when nothing failed, so a line
+      // that stopped being covered and a test that started failing arrive
+      // as one message with half of it missing.
+      reportOnFailure: true,
       thresholds: {
         statements: 100,
         branches: 100,

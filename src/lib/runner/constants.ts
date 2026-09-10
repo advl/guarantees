@@ -13,6 +13,20 @@ export const RUNNER_BIN = "/node_modules/.bin/vitest";
 export const WORKSPACE = "/workspace";
 
 /**
+ * What a package manager installs into, at every level of a tree.
+ *
+ * Spelled here because three parts of the package answer to it and have to
+ * agree: a run masks the repository's own install, the toolchain stamp walks
+ * the same path to find which install answered for a module, and the
+ * layering scan skips what nobody in the tree wrote. A mask that stopped
+ * covering what the stamp walks would report a corpus in order over a
+ * toolchain nobody chose.
+ *
+ * @package
+ */
+export const INSTALL_DIR = "node_modules";
+
+/**
  * The corpus's scratch directory: one subdirectory per entry, the one place
  * an entry can write, and the lifted reports. Spelled here because the
  * runner is told to collect nothing under it and a run mounts an entry's
@@ -36,3 +50,14 @@ export const REPORT_FILE = "report.json";
  * @package
  */
 export const COLLECTS = ".test.ts";
+
+/**
+ * The one directory under an entry's work directory whose contents outlive
+ * the run. Teardown removes `.work/<id>` on every path, so what an entry
+ * generated for a golden has no other route out of the container; it is
+ * spelled here beside the rest of the corpus layout because the run lifts
+ * it and the golden reads it, and the two agree by reading one constant.
+ *
+ * @package
+ */
+export const LIFT_DIR = "lift";

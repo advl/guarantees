@@ -10,12 +10,17 @@
 export { default as buildImage } from "./buildImage.js";
 export {
   CONTAINERFILE,
+  DEFAULT_IMAGE,
   IMAGES_DIR,
   INPUTS_PATTERN,
+  LOCAL_PREFIX,
   PINNED_FILE,
   REFERENCE_PATTERN,
 } from "./constants.js";
 export { default as hashImageInputs } from "./hashImageInputs.js";
+export { default as judgePinned } from "./judgePinned.js";
+export { default as locatePinned } from "./locatePinned.js";
 export { default as readPinned } from "./readPinned.js";
 export { default as resolveImage } from "./resolveImage.js";
+export { default as tagLocalBuild } from "./tagLocalBuild.js";
 export type { Built, ImageRef, Pinned } from "./types.js";
