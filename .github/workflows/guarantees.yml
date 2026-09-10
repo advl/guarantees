@@ -1,0 +1,81 @@
+name: Guarantees
+on:
+  push:
+    branches: [main]
+  # No base-branch filter, for the reason the other workflow states: the
+  # filter matches the branch a pull request targets, and a change is gated
+  # because it is a change, not because of what it is based on.
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pr:
+    name: pr tier
+    # A hosted runner, because there is nothing here a particular machine
+    # has to be. The base image is built and pushed once by the other
+    # workflow, and every row pins the digest that job published; a run
+    # resolves that digest in local storage first and pulls it when the
+    # storage does not hold it, so the machine this job lands on fetches
+    # the image rather than reproducing it. The image is public, so the
+    # fetch needs no credential and this job needs no registry login.
+    #
+    # What the record beside the definition carries is the digest and a hash
+    # over the files the image is built from. The hash is over files, needs
+    # no engine and is the same everywhere, and it is what says whether a
+    # rebuild was a rebuild of the same definition — which is why nothing
+    # here builds anything to compare digests, and why the image tie the pr
+    # tier runs can be asserted on a machine that has never built the image.
+    runs-on: ubuntu-latest
+    # One container per row, over a pull of the base image. Anything past
+    # this is a hung process, against a default of 360 minutes billed.
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.13"
+
+      # `tsc` and the runner are `#!/usr/bin/env node` executables and run
+      # under whatever Node is on PATH, so the version is declared here
+      # rather than inherited from the runner image.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Cache Bun global cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-cache-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-cache-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The corpus resolves the package through an install of its own, which
+      # is a link into `dist/`, so the build comes first.
+      - name: Build the package
+        run: bun run build
+
+      - name: Install the corpus
+        run: bun run install:corpus
+
+      - name: Check the corpus
+        run: bun run g:check
+
+      - name: Run the pr tier
+        run: bun run g:tier pr
+
+      - name: Prove the pr tier
+        run: bun run g:prove pr
