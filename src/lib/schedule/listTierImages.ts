@@ -21,10 +21,6 @@ import planTier from "./planTier.js";
  *
  * @throws Refusal from `planTier` on a tier that holds nothing, and on one
  * holding no row designed to fail.
- *
- * @package The binary composes it; no entry module admits it, because what a
- * tier's rows pin an image by is this package's own arrangement rather than
- * something an embedder decides.
  */
 export default function listTierImages(
   register: Register,

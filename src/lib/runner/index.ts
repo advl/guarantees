@@ -21,6 +21,7 @@ export {
   REPORT_FILE,
   REPORTS_DIR,
   RUNNER_BIN,
+  RUNNER_SCRATCH,
   WORK_DIR,
   WORKSPACE,
 } from "./constants.js";

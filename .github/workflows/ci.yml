@@ -72,6 +72,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # `check` type-checks the corpus, which resolves this package through an
+      # install of its own. A fresh clone that skips this fails that gate by
+      # name rather than in a resolution error three files in.
+      - name: Install the corpus
+        run: bun run install:corpus
+
       # One target, and this file never names what it runs. `ci` is the gate
       # the manifest declares for itself, so a gate that is added there is
       # enforced here without this file changing — and a gate this file named

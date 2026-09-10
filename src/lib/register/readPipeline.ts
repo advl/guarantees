@@ -73,10 +73,6 @@ const named = (
  *
  * @throws RegisterRefusal naming every unrecognised tier, and a workflow
  * that names none.
- *
- * @package The binary reads the pipeline and hands it to the parser; no entry
- * module admits it, because which tiers a workflow triggers is a fact about
- * this package's own arrangement of a repository rather than about a caller.
  */
 export default function readPipeline(text: string, collects: string): Pipeline {
   const commands = _readRunSteps(text);

@@ -1,13 +1,15 @@
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 
 import {
   buildImage,
+  hashImageInputs,
   IMAGES_DIR,
   INPUTS_PATTERN,
   PINNED_FILE,
+  readPinned,
 } from "../../lib/image/index.js";
 import { spawnProcess } from "../../lib/process/index.js";
 import { UNMEASURED_S } from "../../lib/register/index.js";
@@ -161,9 +163,16 @@ describe("the base image", () => {
     expect(digests[1]).toBe(digests[0]);
   }, 300_000);
 
-  it("carries no pinned record until it has been pushed", () => {
-    expect(
-      existsSync(join(root, IMAGES_DIR, BASE_IMAGE_NAME, PINNED_FILE)),
-    ).toBe(false);
+  it("is recorded as the reference this repository's own rows pin, over the definition the record was taken from", () => {
+    const pinned = readPinned(
+      readFileSync(
+        join(root, IMAGES_DIR, BASE_IMAGE_NAME, PINNED_FILE),
+        "utf8",
+      ),
+    );
+    expect(pinned.inputs).toBe(hashImageInputs(root, BASE_IMAGE_NAME));
+    // The digest and not the ID: the record names the image as a row names
+    // it, and the ID is a name in this machine's store alone.
+    expect(pinned.digest).toContain("@sha256:");
   });
 });

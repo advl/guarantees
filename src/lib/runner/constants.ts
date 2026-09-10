@@ -47,7 +47,10 @@ export const REPORT_FILE = "report.json";
  * pipeline's `collects`, so the register and the runner hold a row's file to
  * one rule.
  *
- * @package
+ * It is published, because the caller the sentence above names is a corpus:
+ * `defineCorpusConfig` sets the runner's `include` from this, so a corpus
+ * that does not override it has the suffix set for it and would otherwise
+ * have to retype the literal to say what its own runner collects.
  */
 export const COLLECTS = ".test.ts";
 
@@ -61,3 +64,19 @@ export const COLLECTS = ".test.ts";
  * @package
  */
 export const LIFT_DIR = "lift";
+
+/**
+ * Where the runner writes while it reads a corpus's configuration, relative
+ * to the corpus root.
+ *
+ * The runner bundles the configuration file and imports the result from a
+ * file it writes beside the corpus's own install, so a corpus mounted
+ * read-only cannot be configured at all: the runner stops before collecting
+ * anything, and every entry of the tier reports that it left no report. The
+ * run gives it this one writable path for that reason, and the day the
+ * runner writes somewhere else instead, a tier says so at once rather than
+ * quietly running unconfigured.
+ *
+ * @package
+ */
+export const RUNNER_SCRATCH = `${INSTALL_DIR}/.vite-temp`;

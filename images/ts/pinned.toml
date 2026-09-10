@@ -1,0 +1,6 @@
+# What the base image was last published as. The digest is the one the
+# pipeline pushed and every machine fetches; the inputs hash is over the
+# files the image is built from, is the same on every machine, and is what
+# says whether a rebuild was a rebuild of the same definition.
+digest = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+inputs = "sha256:fb19128da6b78b213e9adce5723a81b5fdc115508b2a9eb379a1c01f0f9f0277"

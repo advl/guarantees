@@ -1,7 +1,12 @@
 import { isAbsolute, join, posix, relative, sep } from "node:path";
 import { Refusal } from "../contract/index.js";
 import { type Row, UNMEASURED_S } from "../register/index.js";
-import { INSTALL_DIR, WORK_DIR, WORKSPACE } from "../runner/index.js";
+import {
+  INSTALL_DIR,
+  RUNNER_SCRATCH,
+  WORK_DIR,
+  WORKSPACE,
+} from "../runner/index.js";
 import {
   CORPUS_LABEL,
   ENTRY_LABEL,
@@ -24,16 +29,18 @@ import type { DescribeContext, RunSpec } from "./types.js";
  * masked, because it sits directly above the corpus on the runtime's upward
  * resolution path and would otherwise answer for every module the image
  * installed at its root; the corpus's own install is left visible, since
- * that is where a corpus keeps the package whose bodies its entries import.
- * Nothing is mounted over the image's toolchain. A build recipe runs from
- * the workspace root, because it is a
- * script of the repository's root manifest, and the measured run from the
- * corpus directory. The network is on for a build — a pinned fixture is
- * fetched there, outside the measured window — and off for the measured run
- * unless the row declares `image-net`, because a guarantee reaching the
- * outside world mid-measurement is measuring the outside world. The
- * deadline is the unmeasured one for a build and the kill multiplier times
- * the budget for the measured run.
+ * that is where a corpus keeps the package whose bodies its entries import,
+ * with one writable path inside it, which is where the runner writes while
+ * it reads the corpus's configuration and without which a corpus mounted
+ * read-only cannot be configured at all. Nothing is mounted over the
+ * image's toolchain. A build recipe runs from the workspace root, because
+ * it is a script of the repository's root manifest, and the measured run
+ * from the corpus directory. The network is on for a build — a pinned
+ * fixture is fetched there, outside the measured window — and off for the
+ * measured run unless the row declares `image-net`, because a guarantee
+ * reaching the outside world mid-measurement is measuring the outside
+ * world. The deadline is the unmeasured one for a build and the kill
+ * multiplier times the budget for the measured run.
  *
  * Both roots must be absolute, and the refusal is here rather than at the
  * engine, because a relative host path in a bind mount is not a path to the
@@ -83,7 +90,10 @@ export default function describeRun(
         readOnly: false,
       },
     ],
-    masks: [posix.join(WORKSPACE, INSTALL_DIR)],
+    masks: [
+      posix.join(WORKSPACE, INSTALL_DIR),
+      posix.join(corpusInImage, ...RUNNER_SCRATCH.split("/")),
+    ],
     workdir: build ? WORKSPACE : corpusInImage,
     network: build || row.isolation === "image-net",
     deadlineS: build ? UNMEASURED_S : row.run.budget * KILL_MULTIPLIER,

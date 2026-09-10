@@ -1,0 +1,106 @@
+# The register: one table per guarantee.
+#
+# A row carries everything its test file cannot say about itself.
+#
+#   kind      What sort of fact the entry pins. The kinds that pool share the
+#             machine; every other kind, and any row that declares `holds`,
+#             runs alone after the pool drains, because a budget measured
+#             beside three other containers is not the budget.
+#   tier      The earliest moment the thing it pins could have changed,
+#             demoted only as cost demands. The pr tier is 60 s per entry and
+#             300 s of wall over the whole schedule.
+#   file      The test file, relative to this directory. What this column and
+#             the tree say must agree in both directions, which is what
+#             `corpus-bijection` pins and what `g:prove pr` proves it can see.
+#   select    How the runner finds the entry inside its file: the name of the
+#             file's top-level suite, which each body opens under the row's id.
+#   build     Recipes run before the runner, inside the image, outside the
+#             measured window. None here: every entry reads the tree it is
+#             already handed.
+#   image     The image the run is admissible in, pinned by digest. The base
+#             image is built and pushed by the pipeline and fetched by
+#             whatever machine runs the row; the digest is recorded a second
+#             time in images/ts/pinned.toml beside a hash of the files the
+#             image is built from, and `corpus-image` is red whenever the two
+#             recordings and the tree stop agreeing.
+#   isolation What the measured run may reach. `image` is the strict one: a
+#             guarantee that reaches the outside world mid-measurement is
+#             measuring the outside world.
+#   holds     What the entry keeps beyond its own container and work
+#             directory. Nothing here holds anything.
+#   teardown  Recipes that release what `holds` names.
+#   expect    Whether the entry is expected to pass or to fail. Exactly one
+#             row per tier fails on purpose, and `g:prove` requires it red
+#             before the tier is called green.
+#   run_s     The measurement, the machine class it was taken on, and the
+#             budget it set. Written by `bun run g:rebudget <id>` on a quiet
+#             machine and never by hand; the hard kill is three times the
+#             budget.
+
+[corpus]
+contract = "1"
+
+[corpus-bijection]
+kind      = "conformance"
+tier      = "pr"
+file      = "corpus-bijection.test.ts"
+select    = "corpus-bijection"
+build     = []
+image     = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+isolation = "image"
+holds     = []
+teardown  = []
+expect    = "pass"
+run_s     = { class = "dev-x86_64-linux", p95 = 3.2, budget = 10 }
+
+[corpus-layering]
+kind      = "conformance"
+tier      = "pr"
+file      = "corpus-layering.test.ts"
+select    = "corpus-layering"
+build     = []
+image     = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+isolation = "image"
+holds     = []
+teardown  = []
+expect    = "pass"
+run_s     = { class = "dev-x86_64-linux", p95 = 2.6, budget = 10 }
+
+[corpus-image]
+kind      = "conformance"
+tier      = "pr"
+file      = "corpus-image.test.ts"
+select    = "corpus-image"
+build     = []
+image     = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+isolation = "image"
+holds     = []
+teardown  = []
+expect    = "pass"
+run_s     = { class = "dev-x86_64-linux", p95 = 2.6, budget = 10 }
+
+[corpus-toolchain]
+kind      = "conformance"
+tier      = "pr"
+file      = "corpus-toolchain.test.ts"
+select    = "corpus-toolchain"
+build     = []
+image     = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+isolation = "image"
+holds     = []
+teardown  = []
+expect    = "pass"
+run_s     = { class = "dev-x86_64-linux", p95 = 2.5, budget = 10 }
+
+[corpus-can-fail]
+kind      = "conformance"
+tier      = "pr"
+file      = "selftest/corpus-can-fail.test.ts"
+select    = "corpus-can-fail"
+build     = []
+image     = "ghcr.io/advl/guarantees-base-ts@sha256:fefe031e597defcce11efff4ec83e28c597bfeb2ed21855e17b40ea584608174"
+isolation = "image"
+holds     = []
+teardown  = []
+expect    = "fail"
+run_s     = { class = "dev-x86_64-linux", p95 = 1.9, budget = 10 }
