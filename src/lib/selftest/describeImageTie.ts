@@ -27,8 +27,9 @@ import { _DRIFT_TITLE, _UNRECORDED_TITLE, _UNTIED_TITLE } from "./constants.js";
  * every machine can compute, so the hash is what says whether the published
  * image was built from the tree the rows are measured against.
  *
- * The root is the directory that HOLDS `images/`, which is the repository
- * root for a package that defines its own base and the corpus root for a
+ * The root is the directory that HOLDS `images/`, and which one that is is
+ * a position the caller resolves rather than a fact this body assumes: the
+ * repository root for a package that defines its own base and the corpus root for a
  * consumer that derives one, and it is the caller's fact because the body
  * must not guess which of the two it is looking at.
  *
