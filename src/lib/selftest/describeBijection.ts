@@ -1,5 +1,6 @@
 import { beforeAll, describe } from "vitest";
 
+import { UNCLAIMED_TITLE } from "../contract/index.js";
 import type { Register } from "../register/index.js";
 import {
   findUnclaimedFiles,
@@ -7,7 +8,7 @@ import {
   listCollected,
 } from "../runner/index.js";
 import _requireNothingFound from "./_requireNothingFound.js";
-import { _UNCOLLECTED_TITLE, UNCLAIMED_TITLE } from "./constants.js";
+import { _UNCOLLECTED_TITLE } from "./constants.js";
 
 /**
  * The corpus's account of itself, in both directions: every file the runner

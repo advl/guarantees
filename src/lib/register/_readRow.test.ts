@@ -6,6 +6,7 @@ import {
   IMAGE_A,
   MACHINE_CLASS,
   PIPELINE,
+  REQUIRED_ROWS,
   renderRegister,
   renderRow,
 } from "../../_testing/fixtures.js";
@@ -13,11 +14,9 @@ import { registerSchema } from "../contract/index.js";
 import { parseRegister, RegisterRefusal } from "./index.js";
 
 const ROW = "corpus-image";
-const SENTINEL = renderRow("corpus-can-fail", { expect: `"fail"` });
-
-/** A two-row pr register whose pass row carries one mutation. */
+/** A pr register whose one extra row carries one mutation. */
 const mutated = (columns: Readonly<Record<string, string | null>>) =>
-  renderRegister([renderRow(ROW, columns), SENTINEL]);
+  renderRegister([renderRow(ROW, columns), ...REQUIRED_ROWS]);
 
 const runS = (fields: string) => `{ ${fields} }`;
 const CLASS = `class = "${MACHINE_CLASS}"`;
@@ -145,6 +144,7 @@ describe("parseRegister", () => {
       });
       const specs = renderRegister([
         renderRow(ROW, { file: `"x.spec.ts"` }),
+        renderRow("corpus-bijection", { file: `"z.spec.ts"` }),
         renderRow("corpus-can-fail", { file: `"y.spec.ts"`, expect: `"fail"` }),
       ]);
       expect(

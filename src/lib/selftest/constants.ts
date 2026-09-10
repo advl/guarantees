@@ -1,14 +1,3 @@
-/**
- * The title of the assertion a tier's proof requires among the failed, so
- * that it is written once and read by both the body that carries it and the
- * proof that names it. A proof matching a title typed a second time proves
- * that the two strings agree and nothing else, and goes quiet the day one
- * of them is reworded.
- *
- * @package
- */
-export const UNCLAIMED_TITLE = "claims every file the runner would collect";
-
 /** The bijection's other direction: what the register promises, resolved. */
 export const _UNCOLLECTED_TITLE =
   "resolves every row to a file the runner would collect";

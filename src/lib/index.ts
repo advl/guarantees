@@ -59,6 +59,10 @@ export {
   spawnProcess,
 } from "./process/index.js";
 export {
+  type ProveContext,
+  proveTier,
+} from "./prove/index.js";
+export {
   CEILINGS,
   type Expect,
   ISOLATIONS,

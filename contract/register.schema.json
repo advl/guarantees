@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Register",
-  "description": "One table per guarantee, keyed by id, plus an optional `corpus` header table. This schema is necessary and not sufficient: the parser also requires a budget of at least ceil(p95 × 1.5), a teardown wherever holds is non-empty, a file carrying the suffix the runner collects, one row expecting failure in every tier that holds rows, and every such tier triggered and proven by the pipeline.",
+  "description": "One table per guarantee, keyed by id, plus an optional `corpus` header table. This schema is necessary and not sufficient: the parser also requires a budget of at least ceil(p95 × 1.5), a teardown wherever holds is non-empty, a file carrying the suffix the runner collects, one row expecting failure in every tier that holds rows, every such tier triggered and proven by the pipeline, and a row under the id `$defs/prove` names for the bijection.",
   "type": "object",
   "properties": {
     "corpus": {
@@ -59,7 +59,7 @@
           "p95": "nearest-rank"
         }
       },
-      "description": "The numbers the parser and the scheduler hold a register to: per-tier ceilings in seconds, the deadline on everything outside the measured window, and the budget rule — the floor, the headroom, the hard-kill multiplier, how many measured windows a budget is set from and the p95 estimator over them, nearest rank. A tier absent from `ceilings` has none."
+      "description": "The numbers the parser and the scheduler hold a register to: per-tier ceilings in seconds — `entry` bounds one row's budget, which is its measured phase alone, and `wall` bounds the wall-clock span of the tier's whole schedule from the first row starting to the last one torn down, image resolution, build recipes and teardown included, because that span is what the tier costs whoever waits for it — the deadline on everything outside the measured window, and the budget rule — the floor, the headroom, the hard-kill multiplier, how many measured windows a budget is set from and the p95 estimator over them, nearest rank. A tier absent from `ceilings` has none."
     },
     "header": {
       "type": "object",
@@ -95,6 +95,14 @@
       ],
       "description": "What sort of fact the row pins. The kinds in `$defs/pooledKinds` run as a pool; every other kind runs one at a time after the pool drains, as does any row that declares `holds`."
     },
+    "prove": {
+      "const": {
+        "bijectionId": "corpus-bijection",
+        "orphanId": "_prove_orphan",
+        "unclaimedTitle": "claims every file the runner would collect"
+      },
+      "description": "What a tier's proof by orphan is written in: the id of the row that scans the corpus, the id the file installed under it is named for — opening with a character no id may carry, so no register can claim it — and the title of the assertion that rigged run must report failing. The proof reads that title out of the run's own report, so the three are one datum here rather than three literals in every implementation."
+    },
     "buildFlags": {
       "const": [
         "--timestamp",
@@ -102,6 +110,13 @@
         "--omit-history"
       ],
       "description": "What the engine is asked for when an image is built, beyond its definition: every layer dated at one instant and no build history in the image configuration. Without them one definition answers a new digest on every build, and the job that publishes the image would repoint every row each time it ran. They do not make a digest reproduce across machines and nothing does — a layer is an archive of a filesystem rather than the filesystem — which is why an image is published once and fetched by digest rather than rebuilt, and why what a record pins the definition by is a hash over its files."
+    },
+    "face": {
+      "const": {
+        "tier": "g:tier",
+        "prove": "g:prove"
+      },
+      "description": "How a workflow names a tier: the task-face commands its steps run. A step running `<tier> <name>` triggers that tier and a step running `<prove> <name>` proves it, and a tier a register holds that no step names either way is refused on every command. Carried here because the pipeline is read from a file both implementations read, and a name each of them guessed at would refuse the other's workflow."
     },
     "pooledKinds": {
       "const": [

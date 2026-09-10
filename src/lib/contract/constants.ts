@@ -9,6 +9,16 @@
  * parser also requires — relations between values, sums across rows, what the
  * pipeline runs — so each schema says of itself that it is necessary and not
  * sufficient, and the parser is the authority on the rest.
+ *
+ * It is past 500 lines, and the content is irreducible rather than
+ * unsorted. Most of it is the descriptions the emitted files carry: the
+ * schema is the document a second implementation reads instead of this
+ * source, so every constraint it states carries the sentence saying why,
+ * and a description moved out of the object would be a description the
+ * emitted file no longer has. Splitting the five schemas across files would
+ * break the citations between their fragments — the marker, the label and
+ * the report all reference the register's own `$defs` — and would leave the
+ * version in one file and the documents it versions in others.
  */
 
 /**
@@ -54,9 +64,12 @@ const THEN = "then";
  * implementation in another language reads them from the file rather than
  * transcribing them from prose. The per-tier ceilings are in seconds:
  * `entry` bounds one row's budget; `wall` bounds the wall-clock span of the
- * tier's whole schedule, pool and serial list together, so running rows in
- * parallel buys room under it and never loosens it, and it is judged over
- * the schedule as it ran, never over the budgets summed. The pr tier is
+ * tier's whole schedule, pool and serial list together, from the first row
+ * starting to the last one torn down — every phase of every row, not the
+ * measured ones alone, because the wall is what the tier costs whoever
+ * waits for it. Running rows in parallel buys room under it and never
+ * loosens it, and it is judged over the schedule as it ran, never over the
+ * budgets summed. The pr tier is
  * sixty seconds each and five minutes of wall; the later tiers are
  * one number, the wall, which is the per-entry ceiling too since a budget
  * past the wall is one the tier could never meet. The release tier is per
@@ -117,6 +130,23 @@ const ID = {
 const POOLED_KINDS = ["conformance", "oracle", "determinism"] as const;
 
 /**
+ * The three strings a proof by orphan is written in, carried inside the
+ * register schema as `$defs.prove` so that an implementation in another
+ * language reads them from the emitted file rather than guessing at them. A
+ * proof installs a file named for `orphanId`, runs the row whose id is
+ * `bijectionId`, and requires the assertion titled `unclaimedTitle` among
+ * that run report's failed assertions. Two implementations that are to
+ * report the same verdicts have to reproduce all three verbatim, and a
+ * title typed a second time somewhere else would prove that the two
+ * spellings agree and nothing more.
+ */
+const PROVE = {
+  bijectionId: "corpus-bijection",
+  orphanId: "_prove_orphan",
+  unclaimedTitle: "claims every file the runner would collect",
+} as const;
+
+/**
  * What an image build is asked for beyond its definition, carried inside
  * the register schema as `$defs.buildFlags`.
  *
@@ -132,6 +162,34 @@ const POOLED_KINDS = ["conformance", "oracle", "determinism"] as const;
  */
 const BUILD_FLAGS = ["--timestamp", "0", "--omit-history"] as const;
 
+/**
+ * The title of the assertion a tier's proof requires among the failed,
+ * lifted out of the schema so that the body that carries it and the proof
+ * that names it read one datum. It is a fact of the contract and not of
+ * either of them: a proof matching a title typed a second time proves that
+ * two strings agree and nothing else, and goes quiet the day one of them is
+ * reworded. It lives in this domain because its two readers are in
+ * different ones, and because the domain that registers assertions imports
+ * the test runner at load — a name minted there is a name the executable
+ * cannot reach without loading a runner it composes no test with.
+ *
+ * @package
+ */
+export const UNCLAIMED_TITLE: string = PROVE.unclaimedTitle;
+
+/**
+ * How a workflow's steps name a tier, carried inside the register schema as
+ * `$defs.face`. A register is held to what its pipeline runs, and what the
+ * pipeline runs is read out of the steps by looking for these two commands:
+ * a step running `tier <name>` triggers that tier, a step running
+ * `prove <name>` proves it. They are the task face's own names, and two
+ * implementations that read one workflow the same way have to look for the
+ * same two strings — a corpus whose job spells them otherwise is a corpus
+ * every command refuses, so the strings are data rather than one language's
+ * source.
+ */
+const FACE = { tier: "g:tier", prove: "g:prove" } as const;
+
 const RECIPES = {
   type: "array",
   items: { type: "string", minLength: 1 },
@@ -141,7 +199,7 @@ const RECIPES = {
 export const registerSchema = {
   $schema: DRAFT,
   title: "Register",
-  description: `One table per guarantee, keyed by id, plus an optional \`corpus\` header table. This schema is necessary and not sufficient: the parser also requires a budget of at least ceil(p95 × ${LIMITS.budget.headroom}), a teardown wherever holds is non-empty, a file carrying the suffix the runner collects, one row expecting failure in every tier that holds rows, and every such tier triggered and proven by the pipeline.`,
+  description: `One table per guarantee, keyed by id, plus an optional \`corpus\` header table. This schema is necessary and not sufficient: the parser also requires a budget of at least ceil(p95 × ${LIMITS.budget.headroom}), a teardown wherever holds is non-empty, a file carrying the suffix the runner collects, one row expecting failure in every tier that holds rows, every such tier triggered and proven by the pipeline, and a row under the id \`$defs/prove\` names for the bijection.`,
   type: "object",
   properties: {
     [HEADER]: { $ref: "#/$defs/header" },
@@ -162,7 +220,7 @@ export const registerSchema = {
     limits: {
       const: LIMITS,
       description:
-        "The numbers the parser and the scheduler hold a register to: per-tier ceilings in seconds, the deadline on everything outside the measured window, and the budget rule — the floor, the headroom, the hard-kill multiplier, how many measured windows a budget is set from and the p95 estimator over them, nearest rank. A tier absent from `ceilings` has none.",
+        "The numbers the parser and the scheduler hold a register to: per-tier ceilings in seconds — `entry` bounds one row's budget, which is its measured phase alone, and `wall` bounds the wall-clock span of the tier's whole schedule from the first row starting to the last one torn down, image resolution, build recipes and teardown included, because that span is what the tier costs whoever waits for it — the deadline on everything outside the measured window, and the budget rule — the floor, the headroom, the hard-kill multiplier, how many measured windows a budget is set from and the p95 estimator over them, nearest rank. A tier absent from `ceilings` has none.",
     },
     header: {
       type: "object",
@@ -190,10 +248,20 @@ export const registerSchema = {
       description:
         "What sort of fact the row pins. The kinds in `$defs/pooledKinds` run as a pool; every other kind runs one at a time after the pool drains, as does any row that declares `holds`.",
     },
+    prove: {
+      const: PROVE,
+      description:
+        "What a tier's proof by orphan is written in: the id of the row that scans the corpus, the id the file installed under it is named for — opening with a character no id may carry, so no register can claim it — and the title of the assertion that rigged run must report failing. The proof reads that title out of the run's own report, so the three are one datum here rather than three literals in every implementation.",
+    },
     buildFlags: {
       const: BUILD_FLAGS,
       description:
         "What the engine is asked for when an image is built, beyond its definition: every layer dated at one instant and no build history in the image configuration. Without them one definition answers a new digest on every build, and the job that publishes the image would repoint every row each time it ran. They do not make a digest reproduce across machines and nothing does — a layer is an archive of a filesystem rather than the filesystem — which is why an image is published once and fetched by digest rather than rebuilt, and why what a record pins the definition by is a hash over its files.",
+    },
+    face: {
+      const: FACE,
+      description:
+        "How a workflow names a tier: the task-face commands its steps run. A step running `<tier> <name>` triggers that tier and a step running `<prove> <name>` proves it, and a tier a register holds that no step names either way is refused on every command. Carried here because the pipeline is read from a file both implementations read, and a name each of them guessed at would refuse the other's workflow.",
     },
     pooledKinds: {
       const: POOLED_KINDS,

@@ -15,8 +15,9 @@ import {
   renderRegister,
   renderRow,
 } from "../../_testing/fixtures.js";
+import { UNCLAIMED_TITLE } from "../contract/index.js";
 import { parseRegister, type Register } from "../register/index.js";
-import { _UNCOLLECTED_TITLE, UNCLAIMED_TITLE } from "./constants.js";
+import { _UNCOLLECTED_TITLE } from "./constants.js";
 import { describeBijection } from "./index.js";
 
 // The body starts the corpus's own runner in its list mode, which is a

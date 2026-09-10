@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { UNCLAIMED_TITLE } from "../contract/index.js";
 import {
   _DESIGNED_TITLE,
   _DRIFT_TITLE,
@@ -10,7 +11,6 @@ import {
   _UNTIED_TITLE,
   _VERSIONS_TITLE,
 } from "./constants.js";
-import { UNCLAIMED_TITLE } from "./index.js";
 
 const titles = [
   UNCLAIMED_TITLE,
@@ -28,9 +28,5 @@ const titles = [
 describe("selftest constants", () => {
   it("name each assertion once, so no two of a corpus's suites report under one title", () => {
     expect(new Set(titles).size).toBe(titles.length);
-  });
-
-  it("name the assertion a proof requires among the failed, in a form a report carries verbatim", () => {
-    expect(UNCLAIMED_TITLE).toBe("claims every file the runner would collect");
   });
 });

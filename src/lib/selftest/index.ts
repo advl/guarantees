@@ -24,7 +24,6 @@
  * this domain for that reason alone.
  */
 
-export { UNCLAIMED_TITLE } from "./constants.js";
 export { default as describeBijection } from "./describeBijection.js";
 export { default as describeCanFail } from "./describeCanFail.js";
 export { default as describeImageTie } from "./describeImageTie.js";

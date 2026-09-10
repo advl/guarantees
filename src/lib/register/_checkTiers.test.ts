@@ -7,6 +7,7 @@ import {
   PIPELINE,
   REGISTER_ONE_IMAGE,
   REGISTER_TWO_IMAGES,
+  REQUIRED_ROWS,
   renderRegister,
   renderRow,
 } from "../../_testing/fixtures.js";
@@ -23,7 +24,7 @@ describe("parseRegister", () => {
     });
 
     it("is admitted when its budgets sum past its wall, because the wall is judged over the schedule as it ran", () => {
-      // Six pr rows at the 60 s ceiling per entry sum to 360 s against a
+      // Seven pr rows at the 60 s ceiling per entry sum to 420 s against a
       // 300 s wall; as a pool they finish inside it at any concurrency of two,
       // and a parse-time sum would have demoted rows to admit the register.
       const at60 = {
@@ -35,9 +36,10 @@ describe("parseRegister", () => {
         renderRow("c", at60),
         renderRow("d", at60),
         renderRow("e", at60),
+        renderRow("corpus-bijection", at60),
         renderRow("f", { ...at60, expect: `"fail"` }),
       ]);
-      expect(parseRegister(text, PIPELINE).size).toBe(6);
+      expect(parseRegister(text, PIPELINE).size).toBe(7);
     });
 
     it("is refused when it holds rows and the pipeline triggers it not", () => {
@@ -84,8 +86,26 @@ describe("parseRegister", () => {
           run_s: `{ class = "${MACHINE_CLASS}", p95 = 6000, budget = 9000 }`,
         }),
         renderRow("b", { tier: `"release"`, expect: `"fail"` }),
+        ...REQUIRED_ROWS,
       ]);
-      expect(parseRegister(text, PIPELINE).size).toBe(2);
+      expect(parseRegister(text, PIPELINE).size).toBe(4);
+    });
+  });
+
+  describe("a register", () => {
+    it("is refused when it holds rows and none of them is the row a proof rigs", () => {
+      const text = renderRegister([
+        renderRow("a"),
+        renderRow("corpus-can-fail", { expect: `"fail"` }),
+      ]);
+      expectOneFault(text, {
+        table: "corpus-bijection",
+        reason: /is the row a tier's proof rigs and this register holds none/,
+      });
+    });
+
+    it("admits a register with no rows at all, which is a corpus nothing has been written for yet", () => {
+      expect(parseRegister("", PIPELINE).size).toBe(0);
     });
   });
 });
