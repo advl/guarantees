@@ -37,6 +37,7 @@ import {
   buildImage,
   DEFAULT_IMAGE,
   judgePinned,
+  locateImages,
   locatePinned,
   readPinned,
   resolveImage,
@@ -215,13 +216,17 @@ try {
   } else if (subcommand === "image") {
     const name = argument ?? DEFAULT_IMAGE;
     const engine = await probeEngine();
+    // Where a repository keeps its image definitions is a position rather
+    // than a setting: a corpus that derives its own holds them, and a
+    // repository that publishes one holds them at its root.
+    const imagesRoot = locateImages(located.repositoryRoot, located.corpusRoot);
     const built = await buildImage(
       engine,
-      located.repositoryRoot,
+      imagesRoot,
       name,
       tagLocalBuild(name),
     );
-    const record = locatePinned(located.repositoryRoot, name);
+    const record = locatePinned(imagesRoot, name);
     // Nothing is written. The digest a row pins is the one the publishing
     // job pushed, and a build here answers a digest belonging to this
     // machine; what this build settles is whether the definition still
