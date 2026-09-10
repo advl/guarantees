@@ -114,36 +114,57 @@ describe("_readRunSteps", () => {
     ).toEqual([]);
   });
 
-  it("reads nothing out of a job a condition guards, however many steps it holds", () => {
+  // A job's condition is when the job runs, not whether its steps do, and a
+  // tier that runs at merge and not on every pull request is exactly that: a
+  // job the pipeline guards by event. Read as a disqualification it made a
+  // merge tier undeclarable beside a pr tier in one file.
+  it("reads the steps of a job a condition schedules, because that is when it runs", () => {
     expect(
       _readRunSteps(
         [
           "jobs:",
-          "  pr:",
-          "    if: false",
+          "  merge:",
+          "    if: github.event_name == 'push'",
           "    steps:",
-          "      - run: bun run g:tier pr",
-          "      - run: bun run g:prove pr",
+          "      - run: bun run g:tier merge",
+          "      - run: bun run g:prove merge",
         ].join("\n"),
       ),
-    ).toEqual([]);
+    ).toEqual(["bun run g:tier merge", "bun run g:prove merge"]);
   });
 
-  it("keeps the steps of the job beside a guarded one, which is a condition on its neighbour", () => {
+  it("still reads nothing out of a step a condition guards inside a scheduled job", () => {
     expect(
       _readRunSteps(
         [
           "jobs:",
-          "  guarded:",
-          "    if: false",
+          "  merge:",
+          "    if: github.event_name == 'push'",
           "    steps:",
-          "      - run: bun run g:tier pr",
-          "  live:",
-          "    steps:",
-          "      - run: bun run g:prove pr",
+          "      - run: bun run g:tier merge",
+          "      - if: false",
+          "        run: bun run g:prove merge",
         ].join("\n"),
       ),
-    ).toEqual(["bun run g:prove pr"]);
+    ).toEqual(["bun run g:tier merge"]);
+  });
+
+  it("reads a condition above the steps key as the job's, wherever the job writes it", () => {
+    expect(
+      _readRunSteps(
+        [
+          "jobs:",
+          "  merge:",
+          "    runs-on: ubuntu-latest",
+          "    steps:",
+          "      - run: bun run g:tier merge",
+          "  other:",
+          "    if: false",
+          "    steps:",
+          "      - run: bun run g:prove merge",
+        ].join("\n"),
+      ),
+    ).toEqual(["bun run g:tier merge", "bun run g:prove merge"]);
   });
 
   it("reads a folded block the way it reads a literal one, since both are what the step runs", () => {
