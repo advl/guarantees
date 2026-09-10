@@ -4,7 +4,7 @@ import findRow from "../../_testing/findRow.js";
 import { PIPELINE, REGISTER_TWO_IMAGES } from "../../_testing/fixtures.js";
 import { labelSchema, Refusal } from "../contract/index.js";
 import { parseRegister, UNMEASURED_S } from "../register/index.js";
-import { WORKSPACE } from "../runner/index.js";
+import { RUNNER_SCRATCH, WORKSPACE } from "../runner/index.js";
 import {
   type DescribeContext,
   describeRun,
@@ -75,10 +75,19 @@ describe("describeRun", () => {
 
   it("covers the repository's own install and leaves the corpus's own visible", () => {
     for (const phase of ["build", "measured"] as const) {
-      expect(describeRun(walled, context(phase)).masks).toEqual([
+      expect(describeRun(walled, context(phase)).masks).toContain(
         `${WORKSPACE}/node_modules`,
-      ]);
+      );
+      expect(describeRun(walled, context(phase)).masks).not.toContain(
+        `${WORKSPACE}/tests/guarantees/node_modules`,
+      );
     }
+  });
+
+  it("gives the runner one writable path inside the corpus's install, without which a read-only corpus cannot be configured", () => {
+    expect(describeRun(walled, context("measured")).masks).toContain(
+      `${WORKSPACE}/tests/guarantees/${RUNNER_SCRATCH}`,
+    );
   });
 
   it("mounts a corpus at the repository root straight under the workspace", () => {

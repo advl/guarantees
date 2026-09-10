@@ -9,6 +9,9 @@ dist/
 # Test output
 coverage/
 
+# Corpus scratch: build products and run reports, never committed
+.work/
+
 # Environment
 .env
 .env.*

@@ -18,13 +18,21 @@ const declared = fileURLToPath(
 );
 
 describe("@aztlan/guarantees/selftest", () => {
-  it("publishes exactly the five bodies a corpus imports rather than re-authors", () => {
+  // The five bodies, and the three facts a corpus needs before it can hand
+  // them anything: the suffix the runner collects, the reader that turns a
+  // workflow into the tiers it triggers and proves, and the images a tier's
+  // rows name. They are here rather than on the root entry because they are a
+  // corpus's business and not that of a program driving the scheduler.
+  it("publishes the five bodies a corpus imports and the three facts it hands them", () => {
     expect(Object.keys(source).sort()).toEqual([
+      "COLLECTS",
       "describeBijection",
       "describeCanFail",
       "describeImageTie",
       "describeLayering",
       "describeToolchainStamp",
+      "listTierImages",
+      "readPipeline",
     ]);
   });
 

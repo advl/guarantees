@@ -24,6 +24,9 @@
     },
     "./contract/*.schema.json": "./contract/*.schema.json"
   },
+  "bin": {
+    "guarantees": "dist/esm/bin/guarantees.js"
+  },
   "files": [
     "dist",
     "contract"
@@ -48,18 +51,28 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && bun run build:contract",
     "build:contract": "bun src/scripts/emitSchemas.ts",
-    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:leakage && bun run check:webarchitect && bun run check:structure && bun run check:contract",
+    "check": "bun run build && bun run check:biome && bun run check:ts && bun run check:corpus && bun run check:leakage && bun run check:webarchitect && bun run check:structure && bun run check:contract",
     "check:fix": "bun run check:biome:fix && bun run check:ts",
     "check:biome": "biome check",
     "check:biome:fix": "biome check --write",
     "check:ts": "tsc --noEmit",
+    "check:corpus": "tsc --noEmit -p guarantees/tsconfig.json",
     "check:webarchitect": "webarchitect library --license MIT --prefix '@aztlan/'",
     "check:leakage": "bun scripts/check-leakage.ts",
     "check:structure": "bun scripts/check-structure.ts",
     "check:contract": "bun scripts/check-contract.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "ci": "bun run check && bun run test:coverage"
+    "ci": "bun run check && bun run test:coverage",
+    "g": "node dist/esm/bin/guarantees.js run",
+    "g:accept": "node dist/esm/bin/guarantees.js accept",
+    "g:check": "node dist/esm/bin/guarantees.js check",
+    "g:image": "node dist/esm/bin/guarantees.js image",
+    "g:list": "node dist/esm/bin/guarantees.js list",
+    "g:prove": "node dist/esm/bin/guarantees.js prove",
+    "g:rebudget": "node dist/esm/bin/guarantees.js rebudget",
+    "g:tier": "node dist/esm/bin/guarantees.js tier",
+    "install:corpus": "bun scripts/link-corpus.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.9",

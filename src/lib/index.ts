@@ -78,6 +78,7 @@ export {
   RegisterRefusal,
   type Row,
   type RunBudget,
+  readPipeline,
   TIERS,
   type Tier,
   UNMEASURED_S,
@@ -118,6 +119,7 @@ export {
 } from "./runner/index.js";
 export {
   judgeWall,
+  listTierImages,
   type Plan,
   planTier,
 } from "./schedule/index.js";

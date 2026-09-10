@@ -25,7 +25,7 @@ const body = renderEntry(
     `const lift = \`${WORK_DIR}/surface/${LIFT_DIR}\`;`,
     "mkdirSync(lift, { recursive: true });",
     `const generated = "alpha\\nbeta\\n";`,
-    "writeFileSync(`${lift}/surface.txt`, generated);",
+    'writeFileSync(lift + "/surface.txt", generated);',
     `const golden = "${GOLDENS_DIR}/surface/surface.txt";`,
     "expect(existsSync(golden), golden).toBe(true);",
     'expect(readFileSync(golden, "utf8")).toBe(generated);',

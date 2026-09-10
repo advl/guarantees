@@ -8,6 +8,7 @@
  */
 export { default as computeBudget } from "./computeBudget.js";
 export { default as computeP95 } from "./computeP95.js";
+export { BUDGET_RUNS } from "./constants.js";
 export {
   default as readProbe,
   type Phase,

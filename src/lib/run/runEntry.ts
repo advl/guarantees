@@ -7,6 +7,7 @@ import { type Row, UNMEASURED_S } from "../register/index.js";
 import {
   REPORT_FILE,
   REPORTS_DIR,
+  RUNNER_SCRATCH,
   renderEntryCommand,
   WORK_DIR,
 } from "../runner/index.js";
@@ -82,6 +83,15 @@ export default async function runEntry(
   rmSync(join(reports, row.id), { recursive: true, force: true });
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
+  // A mask is a volume with no host side, and an engine mounts one only where
+  // a mountpoint already is: the repository goes in read-only, so a path the
+  // engine would have to create inside it cannot be created, and the container
+  // never starts. The runner's scratch is the one mask that lands inside the
+  // corpus rather than over the install at the image's root, so its directory
+  // is made here, on the host, before anything is asked to mount over it.
+  mkdirSync(join(context.corpusRoot, ...RUNNER_SCRATCH.split("/")), {
+    recursive: true,
+  });
 
   const describe = (
     phase: RunPhase,
